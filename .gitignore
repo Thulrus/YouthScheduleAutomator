@@ -1,0 +1,80 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+nosetests.xml
+test-results/
+tests/__pycache__/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE / Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Mypy / Ruff / Pyright
+.mypy_cache/
+.ruff_cache/
+pyrightconfig.json
+
+# Logs
+*.log
+
+# Generated outputs
+output/
+**/schedule.md
+**/schedule.csv
+**/schedule.ics
+
+# OS
+.DS_Store
+Thumbs.db

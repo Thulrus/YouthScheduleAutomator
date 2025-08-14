@@ -1,8 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import calendar
+
 
 @dataclass(slots=True)
 class RecurringRule:
@@ -16,14 +17,22 @@ class RecurringRule:
     # responsibility: describes how "ownership" or leadership works that day
     # structure: { mode: group|leader|none, rotation_pool?: [group names] }
     responsibility: Dict[str, Any] | None = None
+    start_time: Optional[str] = None  # 'HH:MM' 24h
+    duration_minutes: Optional[int] = None
 
-    def generate_dates(self, year: int, start: date | None = None, end: date | None = None) -> List[date]:
+    def generate_dates(self,
+                       year: int,
+                       start: date | None = None,
+                       end: date | None = None) -> List[date]:
         # For now only monthly nth weekday rules
         dates: List[date] = []
         for month in range(1, 13):
             # Skip out-of-range
             c = calendar.Calendar()
-            month_days = [d for d in c.itermonthdates(year, month) if d.month == month and d.weekday() == self.weekday]
+            month_days = [
+                d for d in c.itermonthdates(year, month)
+                if d.month == month and d.weekday() == self.weekday
+            ]
             target: date | None = None
             if self.nth > 0:
                 if len(month_days) >= self.nth:
@@ -44,14 +53,17 @@ class RecurringRule:
 def parse_rules(raw_rules: Dict[str, Any]) -> List[RecurringRule]:
     rules: List[RecurringRule] = []
     for entry in raw_rules.get("recurring", []):
-        rules.append(RecurringRule(
-            name=entry["name"],
-            frequency=entry.get("frequency", "monthly"),
-            weekday=entry["weekday"],
-            nth=entry["nth"],
-            kind=entry.get("kind", "combined"),
-            description=entry.get("description"),
-            groups_involved=entry.get("groups_involved"),
-            responsibility=entry.get("responsibility"),
-        ))
+        rules.append(
+            RecurringRule(
+                name=entry["name"],
+                frequency=entry.get("frequency", "monthly"),
+                weekday=entry["weekday"],
+                nth=entry["nth"],
+                kind=entry.get("kind", "combined"),
+                description=entry.get("description"),
+                groups_involved=entry.get("groups_involved"),
+                responsibility=entry.get("responsibility"),
+                start_time=entry.get("start_time"),
+                duration_minutes=entry.get("duration_minutes"),
+            ))
     return rules

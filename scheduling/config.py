@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 CONFIG_DIR = Path(__file__).parent
 
+
 @dataclass(slots=True)
 class RawConfig:
     leaders: List[Dict[str, Any]]
@@ -22,4 +23,6 @@ def load_raw_config(base_dir: Path = CONFIG_DIR) -> RawConfig:
     leaders = load_yaml(base_dir / "leaders.yaml")
     groups = load_yaml(base_dir / "groups.yaml")
     rules = load_yaml(base_dir / "rules.yaml")
-    return RawConfig(leaders=leaders.get("leaders", []), groups=groups.get("groups", []), rules=rules)
+    return RawConfig(leaders=leaders.get("leaders", []),
+                     groups=groups.get("groups", []),
+                     rules=rules)

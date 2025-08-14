@@ -6,10 +6,13 @@ from . import models
 # Strategy registry for pluggable leader assignment algorithms.
 _STRATEGIES = {}
 
+
 def register(name: str):
+
     def deco(fn):
         _STRATEGIES[name] = fn
         return fn
+
     return deco
 
 
@@ -18,7 +21,8 @@ def get_strategy(name: str):
 
 
 @register("round_robin")
-def round_robin(leaders: Sequence[models.Leader], count: int, state: dict) -> List[models.Leader]:
+def round_robin(leaders: Sequence[models.Leader], count: int,
+                state: dict) -> List[models.Leader]:
     # state persists across calls (passed in by scheduler)
     idx = state.setdefault("rr_idx", 0)
     selected = []
@@ -33,13 +37,15 @@ def round_robin(leaders: Sequence[models.Leader], count: int, state: dict) -> Li
 
 
 @register("random")
-def random_pick(leaders: Sequence[models.Leader], count: int, state: dict) -> List[models.Leader]:
+def random_pick(leaders: Sequence[models.Leader], count: int,
+                state: dict) -> List[models.Leader]:
     return random.sample(list(leaders), k=min(count, len(leaders)))
 
 
 # Placeholder for a weighted strategy extension point.
 @register("weighted")
-def weighted(leaders: Sequence[models.Leader], count: int, state: dict) -> List[models.Leader]:
+def weighted(leaders: Sequence[models.Leader], count: int,
+             state: dict) -> List[models.Leader]:
     pool = []
     for ld in leaders:
         pool.extend([ld] * max(1, ld.weight))
@@ -54,4 +60,3 @@ def weighted(leaders: Sequence[models.Leader], count: int, state: dict) -> List[
         if len(result) >= count:
             break
     return result
-

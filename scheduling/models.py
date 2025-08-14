@@ -70,17 +70,24 @@ class Schedule:
     def to_rows(self) -> List[Dict[str, str]]:
         rows = []
         for a in self.assignments:
+            # Build unified "in_charge" column: either responsible group, leaders, or both if future logic allows
+            if a.responsible_group and a.leaders:
+                # Currently mutually exclusive by design, but handle gracefully
+                in_charge = f"{a.responsible_group}; " + ", ".join(ld.name for ld in a.leaders)
+            elif a.responsible_group:
+                in_charge = a.responsible_group
+            elif a.leaders:
+                if len(a.leaders) == 2:
+                    in_charge = " & ".join(ld.name for ld in a.leaders)
+                else:
+                    in_charge = ", ".join(ld.name for ld in a.leaders)
+            else:
+                in_charge = "-"
             rows.append({
-                "date":
-                a.event.date.isoformat(),
-                "kind":
-                a.event.kind,
-                "responsible":
-                a.responsible_group or "-",
-                "leaders":
-                ",".join(leader.name for leader in a.leaders),
-                "description":
-                a.event.description,
+                "date": a.event.date.isoformat(),  # canonical machine-friendly
+                "type": a.event.kind,              # renamed from kind for presentation
+                "in_charge": in_charge,
+                "description": a.event.description,
             })
         return rows
 

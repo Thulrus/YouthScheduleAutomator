@@ -16,7 +16,7 @@ recurring:
       kind: combined
       responsibility:
           mode: group # rotate responsible group across rotation_pool
-          rotation_pool: [priests, teachers, deacons, yw_older, yw_younger]
+          rotation_pool: [priests, deacons_teachers, yw_older, yw_younger]
       description: "Combined YW/YM Activity Night"
       start_time: "19:00"
       duration_minutes: 90
@@ -37,7 +37,7 @@ recurring:
       kind: combined
       responsibility:
           mode: group # rotate responsible group across rotation_pool
-          rotation_pool: [priests, teachers, deacons]
+          rotation_pool: [priests, deacons_teachers]
       description: "Combined YM Activity Night"
       start_time: "19:00"
       duration_minutes: 90

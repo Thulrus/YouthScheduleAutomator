@@ -14,16 +14,24 @@ except ImportError:  # fallback minimal
     Console = None
 
 
+def _fmt_date(iso: str) -> str:
+    try:
+        dt = datetime.fromisoformat(iso)
+        return dt.strftime("%b %d, %Y")  # e.g. Jan 07, 2026
+    except Exception:
+        return iso
+
+
 def to_markdown(schedule: Schedule) -> str:
     rows = schedule.to_rows()
     if not rows:
-        return "| date | kind | responsible | leaders | description |\n|---|---|---|---|---|"
-    header = "| date | kind | responsible | leaders | description |"
-    sep = "|---|---|---|---|---|"
+        return "| Date | Type | In Charge | Description |\n|:-----|:-----|:----------|:------------|"
+    header = "| Date | Type | In Charge | Description |"
+    sep = "|:-----|:-----|:----------|:------------|"
     lines = [header, sep]
     for r in rows:
         lines.append(
-            f"| {r['date']} | {r['kind']} | {r['responsible']} | {r['leaders']} | {r['description']} |"
+            f"| {_fmt_date(r['date'])} | {r['type'].title()} | {r['in_charge']} | {r['description']} |"
         )
     return "\n".join(lines)
 
@@ -91,10 +99,12 @@ def print_rich(schedule: Schedule):  # convenience pretty print
         print(to_markdown(schedule))
         return
     table = Table(title="Schedule")
-    for col in ["date", "kind", "responsible", "leaders", "description"]:
-        table.add_column(col)
+    table.add_column("Date")
+    table.add_column("Type")
+    table.add_column("In Charge")
+    table.add_column("Description")
     for r in schedule.to_rows():
-        table.add_row(r["date"], r["kind"], r["responsible"], r["leaders"],
+        table.add_row(_fmt_date(r["date"]), r["type"].title(), r["in_charge"],
                       r["description"])
     if Console:
         console = Console()

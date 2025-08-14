@@ -8,7 +8,7 @@ Modular, extensible scheduler for managing leaders, groups (deacons, teachers, p
 * YAML-configurable rules for recurring events (e.g., first Wednesday, third Sunday)
 * Pluggable leader assignment strategies (round-robin, random, custom)
 * Regenerate schedule for a range of dates without affecting others
-* Export to Markdown table, CSV, or iCal (.ics)
+* Export to Markdown table, CSV, or iCal (.ics) (columns: Date | Type | In Charge | Description)
 
 ## Quick Start
 
@@ -106,6 +106,8 @@ python -m scheduling.main --year 2026 --out md csv ics --tz America/Denver
 ## Extending
 
 See inline comments in `scheduling/scheduler.py` & `scheduling/strategies.py` for extension points.
+
+Note: Dates in Markdown output are formatted as `Mon DD, YYYY` for readability, while CSV retains ISO `YYYY-MM-DD` for machine processing.
 
 ## Roadmap
 

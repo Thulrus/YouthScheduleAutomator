@@ -1,7 +1,5 @@
 groups:
-    - name: deacons
-      members: ["Alex", "Ben", "Caleb", "Dylan"]
-    - name: teachers
+    - name: deacons_teachers
       members: ["Ethan", "Finn", "Gabe"]
     - name: priests
       members: ["Henry", "Isaac", "Jack", "Liam"]

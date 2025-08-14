@@ -13,19 +13,8 @@ from . import exporters
 
 def parse_args():
     p = argparse.ArgumentParser(description="Young Men's Scheduling Tool")
-    p.add_argument("--year", type=int, required=True)
-    p.add_argument("--start", type=str, help="Start date ISO (optional)")
-    p.add_argument("--end", type=str, help="End date ISO (optional)")
-    p.add_argument("--strategy",
-                   type=str,
-                   default="fair",
-                   choices=["fair", "round_robin", "random", "weighted"],
-                   help="Leader assignment strategy (default: fair)")
-    p.add_argument("--min-gap-days",
-                   type=int,
-                   default=5,
-                   help="Minimum days between a leader's assignments (soft: relaxed if insufficient candidates)")
-    p.add_argument("--leaders-per-event", type=int, default=2)
+    p.add_argument("--start", type=str, required=True, help="Start date ISO (YYYY-MM-DD)")
+    p.add_argument("--end", type=str, help="End date ISO (optional; default start + 1 year)")
     p.add_argument("--out",
                    nargs="+",
                    default=["md"],
@@ -43,19 +32,16 @@ def parse_args():
 
 def main():
     args = parse_args()
-    start = date.fromisoformat(args.start) if args.start else None
+    start = date.fromisoformat(args.start)
     end = date.fromisoformat(args.end) if args.end else None
 
     raw = load_raw_config()
     rules = parse_rules(raw.rules)
-    schedule = build_schedule(args.year,
-                              raw.leaders,
+    schedule = build_schedule(raw.leaders,
                               raw.groups,
                               rules,
                               start=start,
-                              end=end,
-                              strategy=args.strategy,
-                              min_gap_days=args.min_gap_days)
+                              end=end)
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

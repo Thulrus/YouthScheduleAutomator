@@ -7,7 +7,7 @@ from datetime import date
 def test_group_rotation_no_duplicate_in_month():
     raw = load_raw_config()
     rules = parse_rules(raw.rules)
-    schedule = build_schedule(2026, raw.leaders, raw.groups, rules, start=date(2026,1,1), end=date(2026,12,31))
+    schedule = build_schedule(raw.leaders, raw.groups, rules, start=date(2026,1,1), end=date(2026,12,31))
     # Map (year, month) -> set of (date,responsible_group) for group-mode events
     month_groups = {}
     for a in schedule.assignments:

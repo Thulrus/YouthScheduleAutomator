@@ -1,9 +1,8 @@
 from __future__ import annotations
-from datetime import date
+from datetime import date, timedelta
 from typing import List, Dict
 from .models import Leader, Group, Event, Assignment, Schedule
 from .rules import RecurringRule
-from . import strategies
 
 # ---------------
 # Builder helpers
@@ -31,14 +30,16 @@ def build_groups(raw) -> Dict[str, Group]:
     return groups
 
 
-def expand_events(year: int,
-                  rules: List[RecurringRule],
+def expand_events(rules: List[RecurringRule],
                   all_groups: List[str],
-                  start: date | None = None,
-                  end: date | None = None) -> List[Event]:
+                  start: date,
+                  end: date) -> List[Event]:
     events: List[Event] = []
+    span_years = range(start.year, end.year + 1)
     for rule in rules:
-        dates = rule.generate_dates(year, start=start, end=end)
+        dates: List[date] = []
+        for yr in span_years:
+            dates.extend(rule.generate_dates(yr, start=start, end=end))
         involved = rule.groups_involved or all_groups
         responsibility = rule.responsibility or {}
         mode = responsibility.get("mode", "none")
@@ -61,12 +62,13 @@ def expand_events(year: int,
     return events
 
 
+GAP_DAYS = 5  # standard minimum gap between leader assignments
+
+
 def assign_leaders(events: List[Event],
                    leaders: List[Leader],
-                   strategy_name: str = "round_robin",
-                   leaders_per_event: int = 2,
-                   min_gap_days: int = 0) -> List[Assignment]:
-    strategy = strategies.get_strategy(strategy_name)
+                   leaders_per_event: int = 2) -> List[Assignment]:
+    from .strategies import fair as strategy
     # Heterogeneous strategy state (indices, counts, dates)
     state: Dict[str, object] = {}
     assignments: List[Assignment] = []
@@ -111,14 +113,12 @@ def assign_leaders(events: List[Event],
                 and ld.is_available_on(ev.date)
             ]
             # Enforce gap: filter out leaders whose last assignment too recent (soft if insufficient)
-            if min_gap_days > 0:
-                filtered = [ld for ld in eligible if (
-                    ld.name not in last_assigned or (ev.date - last_assigned[ld.name]).days >= min_gap_days
-                )]
-                if len(filtered) >= 1:  # prefer filtered
-                    eligible = filtered
-            needed = 1 if ev.responsibility_mode == "leader" else min(
-                leaders_per_event, len(eligible))
+            filtered = [ld for ld in eligible if (
+                ld.name not in last_assigned or (ev.date - last_assigned[ld.name]).days >= GAP_DAYS
+            )]
+            if filtered:
+                eligible = filtered
+            needed = 1 if ev.responsibility_mode == "leader" else min(leaders_per_event, len(eligible))
             chosen = strategy(eligible, needed, state) if needed > 0 else []
             for ch in chosen:
                 last_assigned[ch.name] = ev.date
@@ -130,17 +130,15 @@ def assign_leaders(events: List[Event],
             group_to_leader: Dict[str, Leader] = {}
             for grp in ev.groups_involved:
                 eligible = [ld for ld in leaders if grp in ld.groups and ld.is_available_on(ev.date)]
-                if min_gap_days > 0:
-                    filtered = [ld for ld in eligible if (
-                        ld.name not in last_assigned or (ev.date - last_assigned[ld.name]).days >= min_gap_days
-                    )]
-                    if filtered:
-                        eligible = filtered
+                filtered = [ld for ld in eligible if (
+                    ld.name not in last_assigned or (ev.date - last_assigned[ld.name]).days >= GAP_DAYS
+                )]
+                if filtered:
+                    eligible = filtered
                 chosen_list = strategy(eligible, 1, state) if eligible else []
                 if chosen_list:
                     group_to_leader[grp] = chosen_list[0]
                     last_assigned[chosen_list[0].name] = ev.date
-            # Flatten unique leaders preserving order
             unique: List[Leader] = []
             seen = set()
             for ld in group_to_leader.values():
@@ -154,24 +152,16 @@ def assign_leaders(events: List[Event],
     return assignments
 
 
-def build_schedule(year: int,
-                   leaders_raw,
+def build_schedule(leaders_raw,
                    groups_raw,
                    rules_objs: List[RecurringRule],
-                   start: date | None = None,
-                   end: date | None = None,
-                   strategy: str = "fair",
-                   min_gap_days: int = 0) -> Schedule:
+                   start: date,
+                   end: date | None = None) -> Schedule:
     leaders = build_leaders(leaders_raw)
     groups = build_groups(groups_raw)
     all_group_names = list(groups.keys())
-    events = expand_events(year,
-                           rules_objs,
-                           all_group_names,
-                           start=start,
-                           end=end)
-    assignments = assign_leaders(events,
-                                 leaders,
-                                 strategy_name=strategy,
-                                 min_gap_days=min_gap_days)
+    if end is None:
+        end = start + timedelta(days=365)
+    events = expand_events(rules_objs, all_group_names, start, end)
+    assignments = assign_leaders(events, leaders)
     return Schedule(assignments=assignments)

@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Scheduler GUI",
+      "type": "shell",
+      "command": "/home/keyser/Documents/Projects/Scheduler/.venv/bin/python",
+      "args": ["-m", "scheduling.gui"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

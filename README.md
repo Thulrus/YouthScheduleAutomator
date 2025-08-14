@@ -9,6 +9,7 @@ Modular, extensible scheduler for managing leaders, groups (deacons, teachers, p
 * Pluggable leader assignment strategies (round-robin, random, custom)
 * Regenerate schedule for a range of dates without affecting others
 * Export to Markdown table, CSV, or iCal (.ics) (columns: Date | Type | In Charge | Description)
+* Optional Tkinter GUI (`python -m scheduling.gui`) for users who prefer not to memorize CLI flags
 
 ## Quick Start
 
@@ -23,6 +24,14 @@ python -m scheduling.main --year 2026 --out md csv --start 2026-01-01 --end 2026
 ```
 
 ## Examples
+
+### Launch GUI
+
+```bash
+python -m scheduling.gui
+```
+
+Select options, click Generate, and outputs will appear in the chosen directory (default ./output). The preview shows the first 25 rows.
 
 ### 1. Generate Only Q1 (Markdown + CSV)
 

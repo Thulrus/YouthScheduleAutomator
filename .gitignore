@@ -56,7 +56,6 @@ tests/__pycache__/
 
 # IDE / Editor
 .idea/
-.vscode/*
 !.vscode/extensions.json
 *.swp
 *.swo

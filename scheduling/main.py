@@ -18,8 +18,13 @@ def parse_args():
     p.add_argument("--end", type=str, help="End date ISO (optional)")
     p.add_argument("--strategy",
                    type=str,
-                   default="round_robin",
-                   choices=["round_robin", "random", "weighted"])
+                   default="fair",
+                   choices=["fair", "round_robin", "random", "weighted"],
+                   help="Leader assignment strategy (default: fair)")
+    p.add_argument("--min-gap-days",
+                   type=int,
+                   default=5,
+                   help="Minimum days between a leader's assignments (soft: relaxed if insufficient candidates)")
     p.add_argument("--leaders-per-event", type=int, default=2)
     p.add_argument("--out",
                    nargs="+",
@@ -49,7 +54,8 @@ def main():
                               rules,
                               start=start,
                               end=end,
-                              strategy=args.strategy)
+                              strategy=args.strategy,
+                              min_gap_days=args.min_gap_days)
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -60,3 +60,55 @@ def weighted(leaders: Sequence[models.Leader], count: int,
         if len(result) >= count:
             break
     return result
+
+
+@register("fair")
+def fair(leaders: Sequence[models.Leader], count: int,
+         state: dict) -> List[models.Leader]:
+    """Fair strategy: choose leaders with lowest total assignment count, then
+    longest time since last assignment (recency), then name for determinism.
+    Expects scheduler to set state['current_date'] before invoking.
+    """
+    if not leaders or count <= 0:
+        return []
+    counts = state.setdefault("fair_counts", {})  # name -> total assignments
+    last_dates = state.setdefault("fair_last", {})  # name -> date
+    current_date = state.get("current_date")
+    blackout_days = 5  # desired minimum gap; >4 blocks Wed->Sun pattern
+
+    # Pre-compute days since for filtering
+    leader_infos = []  # (leader, days_since or large)
+    for ld in leaders:
+        if current_date and ld.name in last_dates:
+            days_since = (current_date - last_dates[ld.name]).days
+        else:
+            days_since = 10_000
+        leader_infos.append((ld, days_since))
+
+    # Primary candidate set respects blackout
+    primary = [ld for (ld, ds) in leader_infos if ds >= blackout_days]
+    candidate_pool = primary if len(primary) >= count else [ld for (ld, _) in leader_infos]
+
+    def sort_key(ld: models.Leader):
+        c = counts.get(ld.name, 0)
+        if current_date and ld.name in last_dates:
+            days_since = (current_date - last_dates[ld.name]).days
+        else:
+            days_since = 10_000  # effectively infinite if never assigned
+        return (c, -days_since, ld.name)
+    ordered = sorted(candidate_pool, key=sort_key)
+    chosen: List[models.Leader] = []
+    used = set()
+    for ld in ordered:
+        if ld.name in used:
+            continue
+        chosen.append(ld)
+        used.add(ld.name)
+        if len(chosen) >= count:
+            break
+    # update state
+    if current_date:
+        for ld in chosen:
+            counts[ld.name] = counts.get(ld.name, 0) + 1
+            last_dates[ld.name] = current_date
+    return chosen

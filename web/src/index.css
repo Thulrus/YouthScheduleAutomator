@@ -1,0 +1,312 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 2.5em;
+  line-height: 1.1;
+  margin: 0 0 1rem 0;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+#root {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app-container {
+  text-align: left;
+}
+
+.controls-section {
+  background: rgba(100, 108, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.date-inputs input {
+  width: 70px;
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.button-primary {
+  background-color: #646cff;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #535bf2;
+}
+
+.button-secondary {
+  background-color: #4caf50;
+  color: white;
+}
+
+.button-secondary:hover {
+  background-color: #45a049;
+}
+
+.preview-section {
+  margin-top: 2rem;
+}
+
+.preview-section h2 {
+  margin-bottom: 1rem;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(100, 108, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.schedule-table th {
+  background: #646cff;
+  color: white;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.schedule-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(100, 108, 255, 0.1);
+}
+
+.schedule-table tr:last-child td {
+  border-bottom: none;
+}
+
+.schedule-table tr:hover {
+  background: rgba(100, 108, 255, 0.1);
+}
+
+.status-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.status-error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.config-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(100, 108, 255, 0.05);
+  border-radius: 8px;
+}
+
+.config-section h2 {
+  margin-top: 0;
+}
+
+.config-section textarea {
+  width: 100%;
+  min-height: 200px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  resize: vertical;
+}
+
+.tab-container {
+  margin-bottom: 1rem;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid rgba(100, 108, 255, 0.2);
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: -2px;
+}
+
+.tab-button.active {
+  border-bottom-color: #646cff;
+  color: #646cff;
+}
+
+.tab-button:hover {
+  background: rgba(100, 108, 255, 0.1);
+}
+
+.config-actions {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.config-actions-group {
+  flex: 1;
+  min-width: 300px;
+}
+
+.config-actions-group h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.button-file-upload {
+  display: inline-block;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  margin: 0;
+}
+
+.button-file-upload:hover {
+  border-color: #646cff;
+}
+
+@media (prefers-color-scheme: light) {
+  .button-file-upload {
+    background-color: #f9f9f9;
+  }
+}

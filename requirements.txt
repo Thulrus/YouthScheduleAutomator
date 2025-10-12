@@ -1,4 +1,0 @@
-pyyaml
-python-dateutil
-ics
-rich

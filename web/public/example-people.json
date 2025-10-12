@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Youth Scheduler - People & Groups Configuration",
+  "description": "Configuration file for leaders, groups, and members",
+  "version": "1.0.0",
+  "leaders": [
+    {
+      "name": "John Smith",
+      "groups": ["deacons"],
+      "availability": [],
+      "weight": 1
+    },
+    {
+      "name": "Jane Doe",
+      "groups": ["teachers", "deacons"],
+      "availability": [],
+      "weight": 1
+    },
+    {
+      "name": "Bob Johnson",
+      "groups": ["priests", "teachers"],
+      "availability": ["wed", "sun"],
+      "weight": 2
+    },
+    {
+      "name": "Mary Williams",
+      "groups": ["priests"],
+      "availability": [],
+      "weight": 1
+    }
+  ],
+  "groups": [
+    {
+      "name": "deacons",
+      "members": [
+        "Alex Brown",
+        "Chris Davis",
+        "Sam Miller"
+      ]
+    },
+    {
+      "name": "teachers",
+      "members": [
+        "Jordan Wilson",
+        "Taylor Moore",
+        "Casey Taylor"
+      ]
+    },
+    {
+      "name": "priests",
+      "members": [
+        "Morgan Anderson",
+        "Riley Thomas",
+        "Avery Jackson"
+      ]
+    }
+  ]
+}

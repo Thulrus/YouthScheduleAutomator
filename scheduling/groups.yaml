@@ -1,9 +1,0 @@
-groups:
-    - name: deacons_teachers
-      members: ["Ethan", "Finn", "Gabe"]
-    - name: priests
-      members: ["Henry", "Isaac", "Jack", "Liam"]
-    - name: yw_older
-      members: ["Mia", "Noah", "Olivia", "Sophia"]
-    - name: yw_younger
-      members: ["Ava", "Ella", "Grace", "Lily"]

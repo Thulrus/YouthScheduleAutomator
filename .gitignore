@@ -1,53 +1,23 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# OS files
+.DS_Store
+Thumbs.db
 
-# C extensions
-*.so
+# Editor directories
+.vscode/*
+!.vscode/tasks.json
+!.vscode/extensions.json
+.idea
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
+# Web app (Node.js / React)
+web/node_modules/
+web/dist/
+web/.vite/
+web/*.local
+web/package-lock.json
+
+# Build outputs
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-env.bak/
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-.coverage
-.coverage.*
-coverage.xml
-htmlcov/
-.pytest_cache/
-nosetests.xml
+*.log
 test-results/
 tests/__pycache__/
 

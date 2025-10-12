@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Youth Scheduler - Rules Configuration",
+  "description": "Configuration file for recurring event rules",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "name": "First Sunday - Combined Sacrament Meeting",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 1,
+      "kind": "combined",
+      "description": "Pass Sacrament",
+      "start_time": "09:00",
+      "duration_minutes": 60
+    },
+    {
+      "name": "Second Wednesday - Activity Night",
+      "frequency": "monthly",
+      "weekday": 2,
+      "nth": 2,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "group",
+        "rotation_pool": ["priests", "teachers", "deacons"]
+      },
+      "description": "Combined Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Weekly Sunday Classes",
+      "frequency": "weekly",
+      "weekday": 6,
+      "kind": "separate",
+      "description": "Sunday School Classes",
+      "start_time": "10:15",
+      "duration_minutes": 45
+    },
+    {
+      "name": "Third Sunday - Combined Service Project",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 3,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "group",
+        "rotation_pool": ["priests", "teachers", "deacons"]
+      },
+      "description": "Service Project",
+      "start_time": "14:00",
+      "duration_minutes": 120
+    },
+    {
+      "name": "Fourth Wednesday - Combined Temple Trip",
+      "frequency": "monthly",
+      "weekday": 2,
+      "nth": 4,
+      "kind": "combined",
+      "description": "Temple Trip",
+      "start_time": "18:00",
+      "duration_minutes": 180
+    }
+  ]
+}

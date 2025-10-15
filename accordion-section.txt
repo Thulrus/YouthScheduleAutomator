@@ -1,0 +1,133 @@
+Replace lines 555-962 (the entire tab-container section) with this accordion structure:
+
+        {/* LEADERS ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${leadersOpen ? 'open' : ''}`}
+              onClick={() => setLeadersOpen(!leadersOpen)}
+            >
+              <span className="accordion-icon">{leadersOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">👥 Leaders ({leaders.length})</span>
+            </button>
+            {leadersOpen && (
+              <div className="accordion-toolbar">
+                <button className="add-button-inline" onClick={addLeader}>
+                  ➕ Add Leader
+                </button>
+                <div className="button-group-inline">
+                  <label className="button-secondary-inline">
+                    📁 Import
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportLeadersJSON}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <button className="button-secondary-inline" onClick={handleExportLeadersJSON}>
+                    💾 Export
+                  </button>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleLeaders}>
+                    ⭐ Example
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {leadersOpen && (
+            <div className="accordion-content">
+              <div className="config-cards">
+                {/* Leaders content stays the same - lines 660-738 */}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* GROUPS ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${groupsOpen ? 'open' : ''}`}
+              onClick={() => setGroupsOpen(!groupsOpen)}
+            >
+              <span className="accordion-icon">{groupsOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">👨‍👩‍👧‍👦 Groups ({groups.length})</span>
+            </button>
+            {groupsOpen && (
+              <div className="accordion-toolbar">
+                <button className="add-button-inline" onClick={addGroup}>
+                  ➕ Add Group
+                </button>
+                <div className="button-group-inline">
+                  <label className="button-secondary-inline">
+                    📁 Import
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportGroupsJSON}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <button className="button-secondary-inline" onClick={handleExportGroupsJSON}>
+                    💾 Export
+                  </button>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleGroups}>
+                    ⭐ Example
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {groupsOpen && (
+            <div className="accordion-content">
+              <div className="config-cards">
+                {/* Groups content stays the same - lines 743-783 */}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RULES ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${rulesOpen ? 'open' : ''}`}
+              onClick={() => setRulesOpen(!rulesOpen)}
+            >
+              <span className="accordion-icon">{rulesOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">📅 Rules ({rules.length})</span>
+            </button>
+            {rulesOpen && (
+              <div className="accordion-toolbar">
+                <button className="add-button-inline" onClick={addRule}>
+                  ➕ Add Rule
+                </button>
+                <div className="button-group-inline">
+                  <label className="button-secondary-inline">
+                    📁 Import
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportRulesJSON}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <button className="button-secondary-inline" onClick={handleExportRulesJSON}>
+                    💾 Export
+                  </button>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleRules}>
+                    ⭐ Example
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {rulesOpen && (
+            <div className="accordion-content">
+              <div className="config-cards">
+                {/* Rules content stays the same - lines 786-960 */}
+              </div>
+            </div>
+          )}
+        </div>

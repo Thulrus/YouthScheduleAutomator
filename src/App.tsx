@@ -6,7 +6,6 @@ import { StrategyName } from './strategies';
 import { exportMarkdown, exportCSV, exportICS, exportTextMessage } from './exporters';
 import './App.css';
 
-type ConfigTab = 'leaders' | 'groups' | 'rules';
 type ScheduleDuration = '1-month' | '3-months' | '6-months' | '1-year' | '2-years';
 
 // Common timezones for the dropdown
@@ -83,7 +82,36 @@ function App() {
       return [];
     }
   });
-  const [activeConfigTab, setActiveConfigTab] = useState<ConfigTab>('leaders');
+  
+  // Accordion state - track which sections are open (only one at a time)
+  const [leadersOpen, setLeadersOpen] = useState(false);
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  
+  // Toggle functions - close others when opening one
+  const toggleLeaders = () => {
+    setLeadersOpen(!leadersOpen);
+    if (!leadersOpen) {
+      setGroupsOpen(false);
+      setRulesOpen(false);
+    }
+  };
+  
+  const toggleGroups = () => {
+    setGroupsOpen(!groupsOpen);
+    if (!groupsOpen) {
+      setLeadersOpen(false);
+      setRulesOpen(false);
+    }
+  };
+  
+  const toggleRules = () => {
+    setRulesOpen(!rulesOpen);
+    if (!rulesOpen) {
+      setLeadersOpen(false);
+      setGroupsOpen(false);
+    }
+  };
   
   // Schedule state
   const [schedule, setSchedule] = useState<Schedule | null>(null);
@@ -552,32 +580,18 @@ function App() {
           <p className="section-description">Set up your leaders, groups, and recurring event rules</p>
         </div>
         
-        <div className="tab-container">
-          <div className="tab-buttons">
+        {/* LEADERS ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
             <button
-              className={`tab-button ${activeConfigTab === 'leaders' ? 'active' : ''}`}
-              onClick={() => setActiveConfigTab('leaders')}
+              className={`accordion-button ${leadersOpen ? 'open' : ''}`}
+              onClick={toggleLeaders}
             >
-              👥 Leaders ({leaders.length})
+              <span className="accordion-icon">{leadersOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">👥 Leaders ({leaders.length})</span>
             </button>
-            <button
-              className={`tab-button ${activeConfigTab === 'groups' ? 'active' : ''}`}
-              onClick={() => setActiveConfigTab('groups')}
-            >
-              👨‍👩‍👧‍👦 Groups ({groups.length})
-            </button>
-            <button
-              className={`tab-button ${activeConfigTab === 'rules' ? 'active' : ''}`}
-              onClick={() => setActiveConfigTab('rules')}
-            >
-              📅 Rules ({rules.length})
-            </button>
-          </div>
-          
-          {/* Toolbar - Context-Aware Buttons */}
-          <div className="tab-toolbar">
-            {activeConfigTab === 'leaders' && (
-              <>
+            {leadersOpen && (
+              <div className="accordion-toolbar">
                 <button className="add-button-inline" onClick={addLeader}>
                   ➕ Add Leader
                 </button>
@@ -598,61 +612,11 @@ function App() {
                     ⭐ Example
                   </button>
                 </div>
-              </>
-            )}
-            {activeConfigTab === 'groups' && (
-              <>
-                <button className="add-button-inline" onClick={addGroup}>
-                  ➕ Add Group
-                </button>
-                <div className="button-group-inline">
-                  <label className="button-secondary-inline">
-                    📁 Import
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleImportGroupsJSON}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                  <button className="button-secondary-inline" onClick={handleExportGroupsJSON}>
-                    💾 Export
-                  </button>
-                  <button className="button-secondary-inline" onClick={handleLoadExampleGroups}>
-                    ⭐ Example
-                  </button>
-                </div>
-              </>
-            )}
-            {activeConfigTab === 'rules' && (
-              <>
-                <button className="add-button-inline" onClick={addRule}>
-                  ➕ Add Rule
-                </button>
-                <div className="button-group-inline">
-                  <label className="button-secondary-inline">
-                    📁 Import
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleImportRulesJSON}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                  <button className="button-secondary-inline" onClick={handleExportRulesJSON}>
-                    💾 Export
-                  </button>
-                  <button className="button-secondary-inline" onClick={handleLoadExampleRules}>
-                    ⭐ Example
-                  </button>
-                </div>
-              </>
+              </div>
             )}
           </div>
-          
-          {/* Tab Content - Configuration Cards */}
-          <div className="tab-content">
-            {activeConfigTab === 'leaders' && (
+          {leadersOpen && (
+            <div className="accordion-content">
               <div className="config-cards">
                 {leaders.map((leader, index) => (
                   <div key={index} className="config-card">
@@ -733,9 +697,47 @@ function App() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* GROUPS ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${groupsOpen ? 'open' : ''}`}
+              onClick={toggleGroups}
+            >
+              <span className="accordion-icon">{groupsOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">👨‍👩‍👧‍👦 Groups ({groups.length})</span>
+            </button>
+            {groupsOpen && (
+              <div className="accordion-toolbar">
+                <button className="add-button-inline" onClick={addGroup}>
+                  ➕ Add Group
+                </button>
+                <div className="button-group-inline">
+                  <label className="button-secondary-inline">
+                    📁 Import
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportGroupsJSON}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <button className="button-secondary-inline" onClick={handleExportGroupsJSON}>
+                    💾 Export
+                  </button>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleGroups}>
+                    ⭐ Example
+                  </button>
+                </div>
+              </div>
             )}
-            
-            {activeConfigTab === 'groups' && (
+          </div>
+          {groupsOpen && (
+            <div className="accordion-content">
               <div className="config-cards">
                 {groups.map((group, index) => (
                   <div key={index} className="config-card">
@@ -776,10 +778,48 @@ function App() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* RULES ACCORDION */}
+        <div className="accordion-section">
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${rulesOpen ? 'open' : ''}`}
+              onClick={toggleRules}
+            >
+              <span className="accordion-icon">{rulesOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">📅 Rules ({rules.length})</span>
+            </button>
+            {rulesOpen && (
+              <div className="accordion-toolbar">
+                <button className="add-button-inline" onClick={addRule}>
+                  ➕ Add Rule
+                </button>
+                <div className="button-group-inline">
+                  <label className="button-secondary-inline">
+                    📁 Import
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportRulesJSON}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <button className="button-secondary-inline" onClick={handleExportRulesJSON}>
+                    💾 Export
+                  </button>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleRules}>
+                    ⭐ Example
+                  </button>
+                </div>
+              </div>
             )}
-            
-            {activeConfigTab === 'rules' && (
-              <div className="config-cards">
+          </div>
+          {rulesOpen && (
+            <div className="accordion-content">
+                            <div className="config-cards">
                 {rules.map((rule, index) => (
                   <div key={index} className="config-card">
                     <div className="config-card-header">
@@ -942,8 +982,8 @@ function App() {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
       

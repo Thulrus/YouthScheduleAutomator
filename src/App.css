@@ -754,3 +754,122 @@
     width: 100%;
   }
 }
+
+/* ===== ACCORDION STYLES ===== */
+.accordion-section {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (prefers-color-scheme: light) {
+  .accordion-section {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@media (prefers-color-scheme: light) {
+  .accordion-header {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.accordion-button {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.accordion-button:hover {
+  background: rgba(100, 108, 255, 0.1);
+}
+
+.accordion-button.open {
+  color: #646cff;
+}
+
+@media (prefers-color-scheme: light) {
+  .accordion-button.open {
+    color: #535bf2;
+  }
+}
+
+.accordion-icon {
+  font-size: 0.8em;
+  transition: transform 0.2s;
+  display: inline-block;
+  width: 1em;
+}
+
+.accordion-title {
+  flex: 1;
+}
+
+.accordion-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.accordion-content {
+  padding: 1.5rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive for accordions */
+@media (max-width: 768px) {
+  .accordion-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .accordion-button {
+    min-width: auto;
+  }
+  
+  .accordion-toolbar {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .accordion-content {
+    padding: 1rem;
+  }
+}

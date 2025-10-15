@@ -47,6 +47,3 @@ __pycache__/
 pyrightconfig.json
 .pytest_cache/
 .ipynb_checkpoints
-
-# Lock files (optional - some projects commit these)
-package-lock.json

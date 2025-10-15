@@ -190,14 +190,7 @@ The app automatically deploys to GitHub Pages via GitHub Actions when you push t
 2. The `dist/` folder contains the static files
 3. Deploy to any static hosting service
 
-## 🤝 Contributing
-
-Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
 ## 📄 License
 
 See [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-This project helps youth organizations efficiently manage scheduling and leader assignments, reducing administrative burden and ensuring fair rotation.

@@ -3,7 +3,7 @@ import { parseRules } from './rules';
 import { buildSchedule } from './scheduler';
 import { Schedule, Leader, Group } from './models';
 import { StrategyName } from './strategies';
-import { exportMarkdown, exportCSV, exportICS } from './exporters';
+import { exportMarkdown, exportCSV, exportICS, exportTextMessage } from './exporters';
 import './App.css';
 
 type ConfigTab = 'leaders' | 'groups' | 'rules';
@@ -154,7 +154,7 @@ function App() {
     }
   };
 
-  const handleExport = (format: 'md' | 'csv' | 'ics') => {
+  const handleExport = (format: 'md' | 'csv' | 'ics' | 'txt') => {
     if (!schedule) {
       setStatusType('error');
       setStatusMessage('Please generate a schedule first');
@@ -171,6 +171,9 @@ function App() {
           break;
         case 'ics':
           exportICS(schedule, timezone);
+          break;
+        case 'txt':
+          exportTextMessage(schedule);
           break;
       }
       setStatusType('success');
@@ -1139,6 +1142,9 @@ function App() {
             </button>
             <button className="export-button" onClick={() => handleExport('ics')}>
               📅 Export Calendar (.ics)
+            </button>
+            <button className="export-button" onClick={() => handleExport('txt')}>
+              💬 Export Text Message
             </button>
           </div>
         </section>

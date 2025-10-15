@@ -7,19 +7,19 @@
     {
       "name": "John Smith",
       "groups": ["deacons"],
-      "availability": [],
+      "availability": ["tue", "sun"],
       "weight": 1
     },
     {
       "name": "Steve Doe",
       "groups": ["teachers", "deacons"],
-      "availability": [],
+      "availability": ["tue", "thu", "sun"],
       "weight": 1
     },
     {
       "name": "Bob Johnson",
       "groups": ["priests", "teachers"],
-      "availability": ["wed", "sun"],
+      "availability": ["tue", "wed", "sun"],
       "weight": 2
     },
     {

@@ -84,19 +84,73 @@ export function expandEvents(
 }
 
 /**
- * Assign responsible groups using round-robin rotation
+ * Assign responsible groups using history-aware smart assignment
+ * Tracks how many times each group has been assigned and when they were last assigned
+ * Prioritizes groups that have been assigned less frequently and less recently
  */
 function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string, number>): Map<string, number> {
   const rotationState = new Map<string, number>(initialGroupState);
+  
+  // Track assignment counts and last assignment index for each group
+  const groupAssignmentCount = new Map<string, number>();
+  const groupLastAssigned = new Map<string, number>();
+  
+  // Initialize from rotation state if provided (for continuity across date ranges)
+  if (initialGroupState) {
+    initialGroupState.forEach((value, key) => {
+      // The rotation state stores position in pool, use it to infer assignment counts
+      groupAssignmentCount.set(key, value);
+    });
+  }
 
-  events.forEach(event => {
-    if (event.responsibilityMode === 'group' && event.rotationPool && event.rotationPool.length > 0) {
-      const pool = event.rotationPool;
-      const poolKey = pool.join(',');
-      const index = rotationState.get(poolKey) || 0;
-      event.responsibleGroup = pool[index % pool.length];
-      rotationState.set(poolKey, index + 1);
-    }
+  // Filter events that need group assignment and sort by date
+  const groupEvents = events.filter(
+    e => e.responsibilityMode === 'group' && e.rotationPool && e.rotationPool.length > 0
+  );
+  
+  // Process events in chronological order
+  groupEvents.forEach((event, eventIndex) => {
+    const pool = event.rotationPool!;
+    const poolKey = pool.join(',');
+    
+    // Build candidate scores for each group in the pool
+    const candidates: Array<{ group: string; score: number }> = pool.map(group => {
+      const assignmentCount = groupAssignmentCount.get(group) || 0;
+      const lastAssignedIndex = groupLastAssigned.get(group) ?? -1;
+      const eventsSinceLastAssignment = lastAssignedIndex === -1 ? 1000 : (eventIndex - lastAssignedIndex);
+      
+      // Lower score is better
+      // Heavily weight recency (want groups that haven't been assigned recently)
+      // Also weight total assignments (want fair distribution)
+      const score = (assignmentCount * 100) - (eventsSinceLastAssignment * 10);
+      
+      return { group, score };
+    });
+    
+    // Sort by score (ascending - lowest score = best candidate)
+    // Then by pool order as tiebreaker for determinism
+    candidates.sort((a, b) => {
+      if (a.score !== b.score) {
+        return a.score - b.score;
+      }
+      // Tiebreaker: maintain pool order for determinism
+      return pool.indexOf(a.group) - pool.indexOf(b.group);
+    });
+    
+    // Select the best candidate (lowest score)
+    const selectedGroup = candidates[0].group;
+    
+    // Assign the group to the event
+    event.responsibleGroup = selectedGroup;
+    
+    // Update tracking
+    groupAssignmentCount.set(selectedGroup, (groupAssignmentCount.get(selectedGroup) || 0) + 1);
+    groupLastAssigned.set(selectedGroup, eventIndex);
+    
+    // Update rotation state for continuity
+    // Store the total assignments for this pool key
+    const poolAssignments = (rotationState.get(poolKey) || 0) + 1;
+    rotationState.set(poolKey, poolAssignments);
   });
 
   return rotationState;
@@ -142,15 +196,14 @@ export function buildSchedule(
   const assignments: Assignment[] = [];
 
   events.forEach(event => {
-    let leadersToAssign: string[] = [];
-
-    if (event.leaderRequired) {
-      const count = event.kind === 'combined' ? leadersPerCombined : 1;
-      leadersToAssign = strategy.assignLeaders(event, leaders, count, assignmentState);
-    }
-
     if (event.kind === 'combined') {
       // One assignment for combined events
+      let leadersToAssign: string[] = [];
+      
+      if (event.leaderRequired) {
+        leadersToAssign = strategy.assignLeaders(event, leaders, leadersPerCombined, assignmentState);
+      }
+      
       assignments.push({
         date: event.date,
         kind: event.kind,
@@ -162,8 +215,29 @@ export function buildSchedule(
         durationMinutes: event.durationMinutes,
       });
     } else {
-      // Separate assignments for each group
+      // Separate assignments for each group - assign leaders individually per group
+      // Track leaders already assigned to THIS specific event to avoid duplicates
+      const leadersAssignedThisEvent = new Set<string>();
+      
       event.groupsInvolved.forEach(groupName => {
+        let leadersToAssign: string[] = [];
+        
+        if (event.leaderRequired) {
+          // Create a modified event for this specific group
+          const groupSpecificEvent: Event = {
+            ...event,
+            groupsInvolved: [groupName], // Only this group for eligibility check
+          };
+          
+          // Filter leaders to exclude those already assigned to this event
+          const availableLeaders = leaders.filter(l => !leadersAssignedThisEvent.has(l.name));
+          
+          leadersToAssign = strategy.assignLeaders(groupSpecificEvent, availableLeaders, 1, assignmentState);
+          
+          // Track this leader so they're not assigned to another group on the same event
+          leadersToAssign.forEach(name => leadersAssignedThisEvent.add(name));
+        }
+        
         assignments.push({
           date: event.date,
           kind: event.kind,

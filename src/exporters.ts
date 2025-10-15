@@ -204,3 +204,99 @@ export function exportICS(schedule: Schedule, timezone: string = 'America/Denver
   const content = generateICS(schedule, timezone);
   downloadFile(content, filename, 'text/calendar');
 }
+
+/**
+ * Generate text message format grouped by month
+ * Designed for easy copy-paste into text messages
+ * 
+ * Example output:
+ * 📅 January 2025
+ * ────────────────────────────────────────
+ * 
+ * Tue 7 - Separate Activity Night: John Smith
+ *   (deacons)
+ * Sun 12 - Combined Sunday Lesson: Steve Doe & Bob Johnson
+ * Tue 14 - Combined YW/YM Activity Night: Ted Williams & John Smith
+ * Tue 21 - YM Combined Activity: Steve Doe & Bob Johnson
+ * 
+ * ========================================
+ * 
+ * 📅 February 2025
+ * ────────────────────────────────────────
+ * ...
+ */
+export function generateTextMessage(schedule: Schedule): string {
+  if (schedule.assignments.length === 0) {
+    return 'No assignments scheduled.';
+  }
+
+  // Group assignments by month
+  const byMonth = new Map<string, Assignment[]>();
+  
+  schedule.assignments.forEach(assignment => {
+    const date = new Date(assignment.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!byMonth.has(monthKey)) {
+      byMonth.set(monthKey, []);
+    }
+    byMonth.get(monthKey)!.push(assignment);
+  });
+
+  // Format each month
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  let text = '';
+  const sortedMonths = Array.from(byMonth.keys()).sort();
+  
+  sortedMonths.forEach((monthKey, index) => {
+    const [year, month] = monthKey.split('-');
+    const monthName = months[parseInt(month) - 1];
+    
+    if (index > 0) {
+      text += '\n\n' + '='.repeat(40) + '\n\n';
+    }
+    
+    text += `📅 ${monthName} ${year}\n`;
+    text += '─'.repeat(40) + '\n\n';
+    
+    const assignments = byMonth.get(monthKey)!;
+    assignments.sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    assignments.forEach(assignment => {
+      const date = new Date(assignment.date);
+      const day = date.getDate();
+      const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+      
+      // Format: "Wed 15 - Sacrament: John & Steve" or "Wed 15 - Activity: priests (responsible group)"
+      let inCharge: string;
+      if (assignment.responsibleGroup) {
+        // Show responsible group for group-responsibility events
+        inCharge = assignment.responsibleGroup;
+        if (assignment.leaders.length > 0) {
+          inCharge += ` (${assignment.leaders.join(' & ')})`;
+        }
+      } else {
+        // Show leaders or TBD
+        inCharge = assignment.leaders.join(' & ') || 'TBD';
+      }
+      
+      text += `${dayName} ${day} - ${assignment.description}: ${inCharge}\n`;
+      
+      // Add group info if it's a separate activity
+      if (assignment.kind === 'separate' && assignment.group) {
+        text += `  (${assignment.group})\n`;
+      }
+    });
+  });
+  
+  return text;
+}
+
+/**
+ * Export schedule as text message format and download
+ */
+export function exportTextMessage(schedule: Schedule, filename: string = 'schedule.txt'): void {
+  const content = generateTextMessage(schedule);
+  downloadFile(content, filename, 'text/plain');
+}

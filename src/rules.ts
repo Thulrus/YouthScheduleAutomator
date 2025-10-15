@@ -27,20 +27,31 @@ export interface RecurringRule {
  * Parse raw YAML rules into RecurringRule objects
  */
 export function parseRules(rawRules: any[]): RecurringRule[] {
-  return rawRules.map(rule => ({
-    name: rule.name,
-    frequency: rule.frequency,
-    weekday: rule.weekday,
-    nth: rule.nth,
-    monthDay: rule.month_day,
-    month: rule.month,
-    kind: rule.kind || 'combined',
-    groupsInvolved: rule.groups_involved,
-    responsibility: rule.responsibility,
-    description: rule.description || rule.name,
-    startTime: rule.start_time,
-    durationMinutes: rule.duration_minutes,
-  }));
+  return rawRules.map(rule => {
+    // Parse responsibility object, converting snake_case to camelCase
+    let responsibility: RecurringRule['responsibility'] = undefined;
+    if (rule.responsibility) {
+      responsibility = {
+        mode: rule.responsibility.mode || 'none',
+        rotationPool: rule.responsibility.rotation_pool || rule.responsibility.rotationPool,
+      };
+    }
+    
+    return {
+      name: rule.name,
+      frequency: rule.frequency,
+      weekday: rule.weekday,
+      nth: rule.nth,
+      monthDay: rule.month_day,
+      month: rule.month,
+      kind: rule.kind || 'combined',
+      groupsInvolved: rule.groups_involved,
+      responsibility,
+      description: rule.description || rule.name,
+      startTime: rule.start_time,
+      durationMinutes: rule.duration_minutes,
+    };
+  });
 }
 
 /**

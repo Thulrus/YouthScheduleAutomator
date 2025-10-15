@@ -425,6 +425,50 @@
   }
 }
 
+/* Group assignments list for separate events */
+.card-group-assignments {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-group-assignments {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.card-group-assignments strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-group-assignments strong {
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
+.card-group-assignments ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.2rem;
+  list-style: none;
+}
+
+.card-group-assignments li {
+  margin: 0.3rem 0;
+  padding-left: 0;
+}
+
+.card-group-assignments li strong {
+  color: #646cff;
+  margin-right: 0.3rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .card-group-assignments li strong {
+    color: #535bf2;
+  }
+}
+
 .more-months-note {
   text-align: center;
   margin-top: 2rem;

@@ -215,9 +215,10 @@ export function buildSchedule(
         durationMinutes: event.durationMinutes,
       });
     } else {
-      // Separate assignments for each group - assign leaders individually per group
+      // Separate events: create ONE assignment with multiple group assignments
       // Track leaders already assigned to THIS specific event to avoid duplicates
       const leadersAssignedThisEvent = new Set<string>();
+      const groupAssignments: Array<{ group: string; leaders: string[] }> = [];
       
       event.groupsInvolved.forEach(groupName => {
         let leadersToAssign: string[] = [];
@@ -238,16 +239,23 @@ export function buildSchedule(
           leadersToAssign.forEach(name => leadersAssignedThisEvent.add(name));
         }
         
-        assignments.push({
-          date: event.date,
-          kind: event.kind,
+        groupAssignments.push({
           group: groupName,
           leaders: leadersToAssign,
-          description: event.description,
-          responsibleGroup: event.responsibleGroup,
-          startTime: event.startTime,
-          durationMinutes: event.durationMinutes,
         });
+      });
+      
+      // Create a single assignment with all group assignments
+      assignments.push({
+        date: event.date,
+        kind: event.kind,
+        group: 'Multiple', // Indicate multiple groups
+        leaders: [], // Empty for grouped separate events
+        description: event.description,
+        responsibleGroup: event.responsibleGroup,
+        startTime: event.startTime,
+        durationMinutes: event.durationMinutes,
+        groupAssignments,
       });
     }
   });

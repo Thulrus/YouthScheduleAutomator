@@ -30,12 +30,17 @@ export interface Event {
 export interface Assignment {
   date: Date;
   kind: 'combined' | 'separate';
-  group: string;
-  leaders: string[];
+  group: string; // For combined: 'All', For separate: used for backward compatibility
+  leaders: string[]; // For combined or backward compatibility
   description: string;
   responsibleGroup?: string;
   startTime?: string;
   durationMinutes?: number;
+  // For separate events: array of group-specific assignments
+  groupAssignments?: Array<{
+    group: string;
+    leaders: string[];
+  }>;
 }
 
 export class Schedule {
@@ -54,14 +59,27 @@ export class Schedule {
     inCharge: string;
     description: string;
   }> {
-    return this.assignments.map(a => ({
-      date: a.date.toISOString().split('T')[0],
-      kind: a.kind,
-      inCharge: a.responsibleGroup 
-        ? `${a.responsibleGroup} (${a.leaders.join(', ')})` 
-        : a.leaders.join(', ') || 'N/A',
-      description: a.description,
-    }));
+    return this.assignments.map(a => {
+      let inCharge: string;
+      
+      // Handle grouped separate assignments
+      if (a.groupAssignments && a.groupAssignments.length > 0) {
+        inCharge = a.groupAssignments
+          .map(ga => `${ga.group}: ${ga.leaders.join(', ') || 'TBD'}`)
+          .join(' | ');
+      } else if (a.responsibleGroup) {
+        inCharge = `${a.responsibleGroup}${a.leaders.length > 0 ? ` (${a.leaders.join(', ')})` : ''}`;
+      } else {
+        inCharge = a.leaders.join(', ') || 'N/A';
+      }
+      
+      return {
+        date: a.date.toISOString().split('T')[0],
+        kind: a.kind,
+        inCharge,
+        description: a.description,
+      };
+    });
   }
 
   /**

@@ -32,7 +32,10 @@ export function generateMarkdown(schedule: Schedule): string {
 
   rows.forEach(row => {
     const date = new Date(row.date);
-    md += `| ${formatDate(date)} | ${row.kind} | ${row.inCharge} | ${row.description} |\n`;
+    // Escape pipe characters in cell content for Markdown tables
+    const escapedInCharge = row.inCharge.replace(/\|/g, '\\|');
+    const escapedDescription = row.description.replace(/\|/g, '\\|');
+    md += `| ${formatDate(date)} | ${row.kind} | ${escapedInCharge} | ${escapedDescription} |\n`;
   });
 
   return md;
@@ -92,15 +95,22 @@ export function generateICS(schedule: Schedule, timezone: string = 'America/Denv
     }
 
     // Summary and description
-    const summary = `${assignment.kind === 'combined' ? 'Combined' : assignment.group}: ${assignment.description}`;
+    const summary = `${assignment.kind === 'combined' ? 'Combined' : 'Separate'}: ${assignment.description}`;
     ics += `SUMMARY:${escapeICS(summary)}\r\n`;
     
     let description = assignment.description;
-    if (assignment.responsibleGroup) {
-      description += ` (Responsible: ${assignment.responsibleGroup})`;
-    }
-    if (assignment.leaders.length > 0) {
-      description += ` - Leaders: ${assignment.leaders.join(', ')}`;
+    if (assignment.groupAssignments && assignment.groupAssignments.length > 0) {
+      description += ' - Assignments: ';
+      description += assignment.groupAssignments
+        .map(ga => `${ga.group}: ${ga.leaders.join(', ') || 'TBD'}`)
+        .join('; ');
+    } else {
+      if (assignment.responsibleGroup) {
+        description += ` (Responsible: ${assignment.responsibleGroup})`;
+      }
+      if (assignment.leaders.length > 0) {
+        description += ` - Leaders: ${assignment.leaders.join(', ')}`;
+      }
     }
     ics += `DESCRIPTION:${escapeICS(description)}\r\n`;
 
@@ -269,23 +279,29 @@ export function generateTextMessage(schedule: Schedule): string {
       const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
       
       // Format: "Wed 15 - Sacrament: John & Steve" or "Wed 15 - Activity: priests (responsible group)"
-      let inCharge: string;
-      if (assignment.responsibleGroup) {
-        // Show responsible group for group-responsibility events
-        inCharge = assignment.responsibleGroup;
-        if (assignment.leaders.length > 0) {
-          inCharge += ` (${assignment.leaders.join(' & ')})`;
-        }
+      text += `${dayName} ${day} - ${assignment.description}`;
+      
+      // Handle grouped separate assignments
+      if (assignment.groupAssignments && assignment.groupAssignments.length > 0) {
+        text += '\n';
+        assignment.groupAssignments.forEach(ga => {
+          const leaders = ga.leaders.join(' & ') || 'TBD';
+          text += `  • ${ga.group}: ${leaders}\n`;
+        });
       } else {
-        // Show leaders or TBD
-        inCharge = assignment.leaders.join(' & ') || 'TBD';
-      }
-      
-      text += `${dayName} ${day} - ${assignment.description}: ${inCharge}\n`;
-      
-      // Add group info if it's a separate activity
-      if (assignment.kind === 'separate' && assignment.group) {
-        text += `  (${assignment.group})\n`;
+        // Single assignment (combined or old-style)
+        let inCharge: string;
+        if (assignment.responsibleGroup) {
+          // Show responsible group for group-responsibility events
+          inCharge = assignment.responsibleGroup;
+          if (assignment.leaders.length > 0) {
+            inCharge += ` (${assignment.leaders.join(' & ')})`;
+          }
+        } else {
+          // Show leaders or TBD
+          inCharge = assignment.leaders.join(' & ') || 'TBD';
+        }
+        text += `: ${inCharge}\n`;
       }
     });
   });

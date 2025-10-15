@@ -1080,7 +1080,19 @@ function App() {
                             </div>
                           )}
                           
-                          {assignment.leaders.length > 0 && (
+                          {/* Show grouped assignments for separate events */}
+                          {assignment.groupAssignments && assignment.groupAssignments.length > 0 ? (
+                            <div className="card-group-assignments">
+                              <strong>Assignments:</strong>
+                              <ul>
+                                {assignment.groupAssignments.map((ga, idx) => (
+                                  <li key={idx}>
+                                    <strong>{ga.group}:</strong> {ga.leaders.join(', ') || 'TBD'}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : assignment.leaders.length > 0 && (
                             <div className="card-leaders">
                               <strong>Leaders:</strong> {assignment.leaders.join(', ')}
                             </div>

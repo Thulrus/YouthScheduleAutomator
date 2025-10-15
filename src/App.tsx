@@ -6,46 +6,6 @@ import { StrategyName } from './strategies';
 import { exportMarkdown, exportCSV, exportICS } from './exporters';
 import './App.css';
 
-// Default configurations
-const DEFAULT_LEADERS: Leader[] = [
-  { name: "John Smith", groups: ["deacons"], availability: [], weight: 1 },
-  { name: "Jane Doe", groups: ["teachers", "deacons"], availability: [], weight: 1 },
-  { name: "Bob Johnson", groups: ["priests", "teachers"], availability: ["wed", "sun"], weight: 2 },
-];
-
-const DEFAULT_GROUPS: Group[] = [
-  { name: "deacons", members: [] },
-  { name: "teachers", members: [] },
-  { name: "priests", members: [] },
-];
-
-const DEFAULT_RULES: any[] = [
-  {
-    name: "First Sunday - Combined Sacrament Meeting",
-    frequency: "monthly",
-    weekday: 6,
-    nth: 1,
-    kind: "combined",
-    description: "Pass Sacrament",
-    start_time: "09:00",
-    duration_minutes: 60
-  },
-  {
-    name: "Second Wednesday - Activity Night",
-    frequency: "monthly",
-    weekday: 2,
-    nth: 2,
-    kind: "combined",
-    responsibility: {
-      mode: "group",
-      rotation_pool: ["priests", "teachers", "deacons"]
-    },
-    description: "Combined Activity Night",
-    start_time: "19:00",
-    duration_minutes: 90
-  },
-];
-
 type ConfigTab = 'leaders' | 'groups' | 'rules';
 type ScheduleDuration = '1-month' | '3-months' | '6-months' | '1-year' | '2-years';
 
@@ -95,32 +55,32 @@ function App() {
   // Config state - using objects instead of YAML strings
   const [leaders, setLeaders] = useState<Leader[]>(() => {
     const saved = localStorage.getItem('leaders');
-    if (!saved) return DEFAULT_LEADERS;
+    if (!saved) return [];
     try {
       return JSON.parse(saved);
     } catch {
       localStorage.removeItem('leaders');
-      return DEFAULT_LEADERS;
+      return [];
     }
   });
   const [groups, setGroups] = useState<Group[]>(() => {
     const saved = localStorage.getItem('groups');
-    if (!saved) return DEFAULT_GROUPS;
+    if (!saved) return [];
     try {
       return JSON.parse(saved);
     } catch {
       localStorage.removeItem('groups');
-      return DEFAULT_GROUPS;
+      return [];
     }
   });
   const [rules, setRules] = useState<any[]>(() => {
     const saved = localStorage.getItem('rules');
-    if (!saved) return DEFAULT_RULES;
+    if (!saved) return [];
     try {
       return JSON.parse(saved);
     } catch {
       localStorage.removeItem('rules');
-      return DEFAULT_RULES;
+      return [];
     }
   });
   const [activeConfigTab, setActiveConfigTab] = useState<ConfigTab>('leaders');
@@ -221,26 +181,50 @@ function App() {
     }
   };
 
-  const handleExportPeopleJSON = () => {
+  const handleExportLeadersJSON = () => {
     try {
-      const peopleConfig = {
+      const leadersConfig = {
         version: '1.0.0',
         leaders,
-        groups,
       };
       
-      const blob = new Blob([JSON.stringify(peopleConfig, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(leadersConfig, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'people-config.json';
+      link.download = 'leaders-config.json';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
       setStatusType('success');
-      setStatusMessage('✅ Exported people configuration');
+      setStatusMessage('✅ Exported leaders configuration');
+    } catch (error) {
+      setStatusType('error');
+      setStatusMessage(`❌ Export error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleExportGroupsJSON = () => {
+    try {
+      const groupsConfig = {
+        version: '1.0.0',
+        groups,
+      };
+      
+      const blob = new Blob([JSON.stringify(groupsConfig, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'groups-config.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setStatusType('success');
+      setStatusMessage('✅ Exported groups configuration');
     } catch (error) {
       setStatusType('error');
       setStatusMessage(`❌ Export error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -272,7 +256,7 @@ function App() {
     }
   };
 
-  const handleImportPeopleJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportLeadersJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -282,21 +266,44 @@ function App() {
         const content = e.target?.result as string;
         const config = JSON.parse(content);
         
-        if (config.leaders) {
-          setLeaders(config.leaders);
-          localStorage.setItem('leaders', JSON.stringify(config.leaders));
+        if (!config.leaders || !Array.isArray(config.leaders)) {
+          throw new Error('Invalid format: "leaders" array not found in file');
         }
         
-        if (config.groups) {
-          setGroups(config.groups);
-          localStorage.setItem('groups', JSON.stringify(config.groups));
-        }
-        
+        setLeaders(config.leaders);
+        localStorage.setItem('leaders', JSON.stringify(config.leaders));
         setStatusType('success');
-        setStatusMessage('✅ Imported people configuration');
+        setStatusMessage(`✅ Imported ${config.leaders.length} leader(s)`);
       } catch (error) {
         setStatusType('error');
-        setStatusMessage(`❌ Import error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setStatusMessage(`❌ Failed to import leaders: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
+  const handleImportGroupsJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const config = JSON.parse(content);
+        
+        if (!config.groups || !Array.isArray(config.groups)) {
+          throw new Error('Invalid format: "groups" array not found in file');
+        }
+        
+        setGroups(config.groups);
+        localStorage.setItem('groups', JSON.stringify(config.groups));
+        setStatusType('success');
+        setStatusMessage(`✅ Imported ${config.groups.length} group(s)`);
+      } catch (error) {
+        setStatusType('error');
+        setStatusMessage(`❌ Failed to import groups: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
     reader.readAsText(file);
@@ -313,60 +320,92 @@ function App() {
         const content = e.target?.result as string;
         const config = JSON.parse(content);
         
-        if (config.rules) {
-          setRules(config.rules);
-          localStorage.setItem('rules', JSON.stringify(config.rules));
+        if (!config.rules || !Array.isArray(config.rules)) {
+          throw new Error('Invalid format: "rules" array not found in file');
         }
         
+        setRules(config.rules);
+        localStorage.setItem('rules', JSON.stringify(config.rules));
         setStatusType('success');
-        setStatusMessage('✅ Imported rules configuration');
+        setStatusMessage(`✅ Imported ${config.rules.length} rule(s)`);
       } catch (error) {
         setStatusType('error');
-        setStatusMessage(`❌ Import error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setStatusMessage(`❌ Failed to import rules: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
     reader.readAsText(file);
     event.target.value = '';
   };
 
-  const handleLoadExamplePeople = async () => {
+  const handleLoadExampleLeaders = async () => {
     try {
-      const response = await fetch('/YouthScheduleAutomator/example-people.json');
+      const response = await fetch('/YouthScheduleAutomator/example-leaders.json');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const config = await response.json();
       
-      if (config.leaders) {
-        setLeaders(config.leaders);
-        localStorage.setItem('leaders', JSON.stringify(config.leaders));
+      if (!config.leaders || !Array.isArray(config.leaders)) {
+        throw new Error('Invalid format: "leaders" array not found in file');
       }
       
-      if (config.groups) {
-        setGroups(config.groups);
-        localStorage.setItem('groups', JSON.stringify(config.groups));
-      }
-      
+      setLeaders(config.leaders);
+      localStorage.setItem('leaders', JSON.stringify(config.leaders));
       setStatusType('success');
-      setStatusMessage('✅ Loaded example people configuration');
+      setStatusMessage(`✅ Loaded ${config.leaders.length} example leader(s)`);
     } catch (error) {
       setStatusType('error');
-      setStatusMessage(`❌ Load error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatusMessage(`❌ Failed to load example leaders: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleLoadExampleGroups = async () => {
+    try {
+      const response = await fetch('/YouthScheduleAutomator/example-groups.json');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const config = await response.json();
+      
+      if (!config.groups || !Array.isArray(config.groups)) {
+        throw new Error('Invalid format: "groups" array not found in file');
+      }
+      
+      setGroups(config.groups);
+      localStorage.setItem('groups', JSON.stringify(config.groups));
+      setStatusType('success');
+      setStatusMessage(`✅ Loaded ${config.groups.length} example group(s)`);
+    } catch (error) {
+      setStatusType('error');
+      setStatusMessage(`❌ Failed to load example groups: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   const handleLoadExampleRules = async () => {
     try {
       const response = await fetch('/YouthScheduleAutomator/example-rules.json');
-      const config = await response.json();
       
-      if (config.rules) {
-        setRules(config.rules);
-        localStorage.setItem('rules', JSON.stringify(config.rules));
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
+      const config = await response.json();
+      
+      if (!config.rules || !Array.isArray(config.rules)) {
+        throw new Error('Invalid format: "rules" array not found in file');
+      }
+      
+      setRules(config.rules);
+      localStorage.setItem('rules', JSON.stringify(config.rules));
       setStatusType('success');
-      setStatusMessage('✅ Loaded example rules configuration');
+      setStatusMessage(`✅ Loaded ${config.rules.length} example rule(s)`);
     } catch (error) {
       setStatusType('error');
-      setStatusMessage(`❌ Load error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatusMessage(`❌ Failed to load example rules: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -545,14 +584,14 @@ function App() {
                     <input
                       type="file"
                       accept=".json"
-                      onChange={handleImportPeopleJSON}
+                      onChange={handleImportLeadersJSON}
                       style={{ display: 'none' }}
                     />
                   </label>
-                  <button className="button-secondary-inline" onClick={handleExportPeopleJSON}>
+                  <button className="button-secondary-inline" onClick={handleExportLeadersJSON}>
                     💾 Export
                   </button>
-                  <button className="button-secondary-inline" onClick={handleLoadExamplePeople}>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleLeaders}>
                     ⭐ Example
                   </button>
                 </div>
@@ -569,14 +608,14 @@ function App() {
                     <input
                       type="file"
                       accept=".json"
-                      onChange={handleImportPeopleJSON}
+                      onChange={handleImportGroupsJSON}
                       style={{ display: 'none' }}
                     />
                   </label>
-                  <button className="button-secondary-inline" onClick={handleExportPeopleJSON}>
+                  <button className="button-secondary-inline" onClick={handleExportGroupsJSON}>
                     💾 Export
                   </button>
-                  <button className="button-secondary-inline" onClick={handleLoadExamplePeople}>
+                  <button className="button-secondary-inline" onClick={handleLoadExampleGroups}>
                     ⭐ Example
                   </button>
                 </div>

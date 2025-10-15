@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Youth Scheduler - Groups Configuration",
+  "description": "Configuration file for youth groups and their members",
+  "version": "1.0.0",
+  "groups": [
+    {
+      "name": "deacons",
+      "members": [
+        "Alex Brown",
+        "Chris Davis",
+        "Sam Miller"
+      ]
+    },
+    {
+      "name": "teachers",
+      "members": [
+        "Jordan Wilson",
+        "Taylor Moore",
+        "Casey Taylor"
+      ]
+    },
+    {
+      "name": "priests",
+      "members": [
+        "Morgan Anderson",
+        "Riley Thomas",
+        "Avery Jackson"
+      ]
+    }
+  ]
+}

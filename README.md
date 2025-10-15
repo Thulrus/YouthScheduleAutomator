@@ -13,7 +13,8 @@ A modern web-based scheduling tool for youth organizations. Generate schedules f
 - 💾 **Browser Storage**: Configurations saved locally in your browser
 - 📁 **JSON Import/Export**: Easily backup and share configurations
 - 🎨 **Modern UI**: Clean, responsive interface built with React + TypeScript
-- �🚀 **Static Hosting**: Runs entirely in your browser - no server needed!
+- 🔒 **Deterministic**: Same inputs always produce identical schedules (reproducible results)
+- 🚀 **Static Hosting**: Runs entirely in your browser - no server needed!
 
 ## 🚀 Quick Start
 
@@ -135,11 +136,23 @@ YouthScheduleAutomator/
 
 ### Building & Testing
 
+## 🔒 Deterministic Scheduling
+
+**The scheduler is fully deterministic** - running the same configuration multiple times will always produce identical results. This means:
+
+✅ Generate a full year, then any single month → they will match perfectly
+✅ Same date range + same config = same assignments every time
+✅ Reproducible schedules for long-term planning
+
+See [doc/AI/DETERMINISM.md](doc/AI/DETERMINISM.md) for technical details and usage examples.
+
+## 💻 Development
+
 ```bash
 # Install dependencies
 npm install
 
-# Start development server
+# Start dev server
 npm run dev
 
 # Build for production

@@ -86,8 +86,8 @@ export function expandEvents(
 /**
  * Assign responsible groups using round-robin rotation
  */
-function assignResponsibleGroups(events: Event[]): void {
-  const rotationState = new Map<string, number>();
+function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string, number>): Map<string, number> {
+  const rotationState = new Map<string, number>(initialGroupState);
 
   events.forEach(event => {
     if (event.responsibilityMode === 'group' && event.rotationPool && event.rotationPool.length > 0) {
@@ -98,10 +98,20 @@ function assignResponsibleGroups(events: Event[]): void {
       rotationState.set(poolKey, index + 1);
     }
   });
+
+  return rotationState;
 }
 
 /**
- * Build complete schedule
+ * State object to track assignment progress
+ */
+export interface SchedulerState {
+  leaderAssignments: Map<string, number>;
+  groupRotations: Map<string, number>;
+}
+
+/**
+ * Build complete schedule with optional initial state for continuity
  */
 export function buildSchedule(
   rawLeaders: any[],
@@ -110,7 +120,8 @@ export function buildSchedule(
   start: Date,
   end: Date,
   strategyName: StrategyName = 'round-robin',
-  leadersPerCombined: number = 2
+  leadersPerCombined: number = 2,
+  initialState?: SchedulerState
 ): Schedule {
   const leaders = buildLeaders(rawLeaders);
   const groups = buildGroups(rawGroups);
@@ -119,12 +130,15 @@ export function buildSchedule(
   // Generate events
   const events = expandEvents(rules, allGroupNames, start, end);
 
-  // Assign responsible groups
-  assignResponsibleGroups(events);
+  // Assign responsible groups with initial state
+  const groupRotationState = assignResponsibleGroups(
+    events, 
+    initialState?.groupRotations
+  );
 
-  // Assign leaders
+  // Assign leaders with initial state
   const strategy = getStrategy(strategyName);
-  const assignmentState = new Map<string, number>();
+  const assignmentState = new Map<string, number>(initialState?.leaderAssignments);
   const assignments: Assignment[] = [];
 
   events.forEach(event => {
@@ -166,5 +180,23 @@ export function buildSchedule(
 
   const schedule = new Schedule(assignments);
   schedule.sort();
+  
+  // Attach the final state to the schedule for continuity
+  (schedule as any).finalState = {
+    leaderAssignments: assignmentState,
+    groupRotations: groupRotationState,
+  };
+  
   return schedule;
 }
+
+/**
+ * Extract the final state from a schedule for use in subsequent scheduling runs
+ */
+export function getSchedulerState(schedule: Schedule): SchedulerState {
+  return (schedule as any).finalState || {
+    leaderAssignments: new Map(),
+    groupRotations: new Map(),
+  };
+}
+

@@ -1,1 +1,278 @@
-/* Additional App-specific styles */
+/* Schedule Preview Styles - Card Based Layout */
+
+.preview-section {
+  margin-top: 2rem;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.preview-header h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.preview-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 0.95em;
+}
+
+@media (prefers-color-scheme: light) {
+  .preview-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(100, 108, 255, 0.1);
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.view-toggle button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9em;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.view-toggle button:hover {
+  background: rgba(100, 108, 255, 0.2);
+}
+
+.view-toggle button.active {
+  background: #646cff;
+  color: white;
+}
+
+.schedule-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.month-group {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.month-header {
+  font-size: 1.5em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #646cff;
+  color: #646cff;
+}
+
+.assignments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.assignment-card {
+  background: rgba(100, 108, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 2px solid rgba(100, 108, 255, 0.2);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.assignment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+  border-color: rgba(100, 108, 255, 0.4);
+}
+
+.assignment-card.combined {
+  border-left: 4px solid #646cff;
+}
+
+.assignment-card.separate {
+  border-left: 4px solid #4caf50;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-date {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-date {
+    color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.card-badge {
+  font-size: 0.8em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.card-badge.combined {
+  background: #646cff;
+  color: white;
+}
+
+.card-badge.separate {
+  background: #4caf50;
+  color: white;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.1em;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-title {
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
+.card-time {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .card-time {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.card-group {
+  font-size: 0.9em;
+  padding: 0.5rem;
+  background: rgba(100, 108, 255, 0.15);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-group {
+    background: rgba(100, 108, 255, 0.1);
+    color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.card-group strong {
+  color: #646cff;
+}
+
+.card-leaders {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-leaders {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.card-leaders strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (prefers-color-scheme: light) {
+  .card-leaders strong {
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
+.more-months-note {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 8px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: light) {
+  .more-months-note {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assignments-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .preview-header {
+    flex-direction: column;
+  }
+  
+  .view-toggle {
+    width: 100%;
+  }
+  
+  .view-toggle button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .assignment-card {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1em;
+  }
+  
+  .month-header {
+    font-size: 1.3em;
+  }
+}

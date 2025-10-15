@@ -65,13 +65,35 @@ const DEFAULT_RULES = `- name: "First Sunday - Combined Sacrament Meeting"
 `;
 
 type ConfigTab = 'leaders' | 'groups' | 'rules';
+type ScheduleDuration = '1-month' | '3-months' | '6-months' | '1-year' | '2-years';
+
+// Common timezones for the dropdown
+const TIMEZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Phoenix',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+  'America/Toronto',
+  'America/Vancouver',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Asia/Dubai',
+  'Australia/Sydney',
+  'Pacific/Auckland',
+];
 
 function App() {
   const currentYear = new Date().getFullYear();
   
   // Form state
   const [startDate, setStartDate] = useState(`${currentYear}-01-01`);
-  const [endDate, setEndDate] = useState(`${currentYear}-12-31`);
+  const [duration, setDuration] = useState<ScheduleDuration>('1-year');
   const [timezone, setTimezone] = useState('America/Denver');
   const [strategy, setStrategy] = useState<StrategyName>('round-robin');
   const [leadersPerCombined, setLeadersPerCombined] = useState(2);
@@ -92,6 +114,32 @@ function App() {
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState<'success' | 'error'>('success');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+
+  // Calculate end date based on start date and duration
+  const calculateEndDate = (start: Date, dur: ScheduleDuration): Date => {
+    const end = new Date(start);
+    
+    switch (dur) {
+      case '1-month':
+        end.setMonth(end.getMonth() + 1);
+        break;
+      case '3-months':
+        end.setMonth(end.getMonth() + 3);
+        break;
+      case '6-months':
+        end.setMonth(end.getMonth() + 6);
+        break;
+      case '1-year':
+        end.setFullYear(end.getFullYear() + 1);
+        break;
+      case '2-years':
+        end.setFullYear(end.getFullYear() + 2);
+        break;
+    }
+    
+    return end;
+  };
 
   const handleGenerate = () => {
     try {
@@ -102,7 +150,7 @@ function App() {
       
       // Parse dates
       const start = new Date(startDate);
-      const end = new Date(endDate);
+      const end = calculateEndDate(start, duration);
       
       if (start > end) {
         setStatusType('error');
@@ -327,7 +375,46 @@ function App() {
     }
   };
 
-  const rows = schedule?.toRows().slice(0, 50) || [];
+  // Group assignments by month for better visualization
+  const groupedAssignments = schedule?.assignments.reduce((acc, assignment) => {
+    const monthKey = assignment.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    if (!acc[monthKey]) {
+      acc[monthKey] = [];
+    }
+    acc[monthKey].push(assignment);
+    return acc;
+  }, {} as Record<string, typeof schedule.assignments>) || {};
+
+  // Format date for display
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  // Format time for display
+  const formatTime = (startTime?: string, durationMinutes?: number) => {
+    if (!startTime) return '';
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    let timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+    
+    if (durationMinutes) {
+      const durationHours = Math.floor(durationMinutes / 60);
+      const durationMins = durationMinutes % 60;
+      if (durationHours > 0) {
+        timeStr += ` (${durationHours}h${durationMins > 0 ? ` ${durationMins}m` : ''})`;
+      } else {
+        timeStr += ` (${durationMins}m)`;
+      }
+    }
+    
+    return timeStr;
+  };
 
   return (
     <div className="app-container">
@@ -347,22 +434,28 @@ function App() {
           </div>
           
           <div className="form-group">
-            <label>End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+            <label>Schedule Duration</label>
+            <select value={duration} onChange={(e) => setDuration(e.target.value as ScheduleDuration)}>
+              <option value="1-month">1 Month</option>
+              <option value="3-months">3 Months</option>
+              <option value="6-months">6 Months</option>
+              <option value="1-year">1 Year</option>
+              <option value="2-years">2 Years</option>
+            </select>
           </div>
           
           <div className="form-group">
             <label>Timezone</label>
-            <input
-              type="text"
+            <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              placeholder="America/Denver"
-            />
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         
@@ -509,31 +602,109 @@ function App() {
         </div>
       </div>
       
+      
       {schedule && (
         <div className="preview-section">
-          <h2>Schedule Preview (First 50 rows)</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="schedule-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>In Charge</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, i) => (
-                  <tr key={i}>
-                    <td>{row.date}</td>
-                    <td>{row.kind}</td>
-                    <td>{row.inCharge}</td>
-                    <td>{row.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="preview-header">
+            <div>
+              <h2>📅 Schedule Preview</h2>
+              <p className="preview-subtitle">
+                {schedule.assignments.length} total assignments
+                {schedule.assignments.length > 150 && ' (showing first 150)'}
+              </p>
+            </div>
+            <div className="view-toggle">
+              <button 
+                className={viewMode === 'cards' ? 'active' : ''}
+                onClick={() => setViewMode('cards')}
+                title="Card View"
+              >
+                🎴 Cards
+              </button>
+              <button 
+                className={viewMode === 'table' ? 'active' : ''}
+                onClick={() => setViewMode('table')}
+                title="Table View"
+              >
+                📊 Table
+              </button>
+            </div>
           </div>
+          
+          {viewMode === 'cards' ? (
+            <div className="schedule-timeline">
+              {Object.entries(groupedAssignments).slice(0, 5).map(([month, assignments]) => (
+                <div key={month} className="month-group">
+                  <h3 className="month-header">{month}</h3>
+                  <div className="assignments-grid">
+                    {assignments.slice(0, 30).map((assignment, i) => (
+                      <div key={i} className={`assignment-card ${assignment.kind}`}>
+                        <div className="card-header">
+                          <span className="card-date">
+                            {formatDate(assignment.date)}
+                          </span>
+                          <span className={`card-badge ${assignment.kind}`}>
+                            {assignment.kind === 'combined' ? '👥 Combined' : '📚 Separate'}
+                          </span>
+                        </div>
+                        
+                        <div className="card-body">
+                          <h4 className="card-title">{assignment.description}</h4>
+                          
+                          {assignment.startTime && (
+                            <div className="card-time">
+                              🕐 {formatTime(assignment.startTime, assignment.durationMinutes)}
+                            </div>
+                          )}
+                          
+                          {assignment.responsibleGroup && (
+                            <div className="card-group">
+                              <strong>Group:</strong> {assignment.responsibleGroup}
+                            </div>
+                          )}
+                          
+                          {assignment.leaders.length > 0 && (
+                            <div className="card-leaders">
+                              <strong>Leaders:</strong> {assignment.leaders.join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="schedule-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>In Charge</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedule.toRows().slice(0, 100).map((row, i) => (
+                    <tr key={i}>
+                      <td>{row.date}</td>
+                      <td>{row.kind}</td>
+                      <td>{row.inCharge}</td>
+                      <td>{row.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {(viewMode === 'cards' && Object.keys(groupedAssignments).length > 5) && (
+            <p className="more-months-note">
+              📌 Showing first 5 months in card view. Switch to table view or export to see the complete schedule.
+            </p>
+          )}
         </div>
       )}
     </div>

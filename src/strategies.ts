@@ -53,7 +53,25 @@ export class RoundRobinStrategy implements AssignmentStrategy {
 }
 
 /**
+ * Seeded random number generator for deterministic random selection
+ */
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  next(): number {
+    // Linear congruential generator
+    this.seed = (this.seed * 9301 + 49297) % 233280;
+    return this.seed / 233280;
+  }
+}
+
+/**
  * Random strategy: randomly select from eligible leaders
+ * Now deterministic using a seeded random number generator based on event date
  */
 export class RandomStrategy implements AssignmentStrategy {
   assignLeaders(
@@ -70,8 +88,17 @@ export class RandomStrategy implements AssignmentStrategy {
 
     if (eligible.length === 0) return [];
 
-    // Shuffle eligible leaders
-    const shuffled = [...eligible].sort(() => Math.random() - 0.5);
+    // Create a deterministic seed from the event date
+    const seed = event.date.getTime();
+    const rng = new SeededRandom(seed);
+
+    // Deterministic shuffle using seeded random
+    const shuffled = [...eligible];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng.next() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
     const selected = shuffled.slice(0, Math.min(count, eligible.length));
 
     // Update state

@@ -5,61 +5,98 @@
   "version": "1.0.0",
   "rules": [
     {
-      "name": "First Sunday - Combined Sacrament Meeting",
+      "name": "First Wednesday Separate Activities",
       "frequency": "monthly",
-      "weekday": 6,
+      "weekday": 2,
       "nth": 1,
-      "kind": "combined",
-      "description": "Pass Sacrament",
-      "start_time": "09:00",
-      "duration_minutes": 60
+      "kind": "separate",
+      "description": "Separate Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
     },
     {
-      "name": "Second Wednesday - Activity Night",
+      "name": "Second Wednesday - YW/YM Combined Activity (Rotating Group)",
       "frequency": "monthly",
       "weekday": 2,
       "nth": 2,
       "kind": "combined",
       "responsibility": {
         "mode": "group",
-        "rotation_pool": ["priests", "teachers", "deacons"]
+        "rotation_pool": ["priests", "deacons_teachers", "yw_older", "yw_younger"]
       },
-      "description": "Combined Activity Night",
+      "description": "Combined YW/YM Activity Night",
       "start_time": "19:00",
       "duration_minutes": 90
     },
     {
-      "name": "Weekly Sunday Classes",
-      "frequency": "weekly",
-      "weekday": 6,
-      "kind": "separate",
-      "description": "Sunday School Classes",
-      "start_time": "10:15",
-      "duration_minutes": 45
-    },
-    {
-      "name": "Third Sunday - Combined Service Project",
+      "name": "Second Sunday Combined Lesson (Leader Led)",
       "frequency": "monthly",
       "weekday": 6,
+      "nth": 2,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "leader"
+      },
+      "description": "Combined Sunday Lesson",
+      "start_time": "10:00",
+      "duration_minutes": 50
+    },
+    {
+      "name": "Third Wednesday YM Combined Activity",
+      "frequency": "monthly",
+      "weekday": 2,
       "nth": 3,
       "kind": "combined",
       "responsibility": {
         "mode": "group",
-        "rotation_pool": ["priests", "teachers", "deacons"]
+        "rotation_pool": ["priests", "deacons_teachers"]
       },
-      "description": "Service Project",
-      "start_time": "14:00",
-      "duration_minutes": 120
+      "description": "Combined YM Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
     },
     {
-      "name": "Fourth Wednesday - Combined Temple Trip",
+      "name": "Fourth Sunday Separate Lessons",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 4,
+      "kind": "separate",
+      "description": "Separate Sunday Lessons",
+      "start_time": "10:00",
+      "duration_minutes": 50
+    },
+    {
+      "name": "Fourth Wednesday Separate Activity",
       "frequency": "monthly",
       "weekday": 2,
       "nth": 4,
+      "kind": "separate",
+      "description": "Separate Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Fifth Wednesday Combined Activity (Bishopric)",
+      "frequency": "monthly",
+      "weekday": 2,
+      "nth": 5,
       "kind": "combined",
-      "description": "Temple Trip",
-      "start_time": "18:00",
-      "duration_minutes": 180
+      "description": "Fifth Wednesday Combined Activity (Bishopric)",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Fifth Sunday Combined Lesson (Bishopric)",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 5,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "none"
+      },
+      "description": "Fifth Sunday Combined Lesson (Bishopric)",
+      "start_time": "10:00",
+      "duration_minutes": 50
     }
   ]
 }

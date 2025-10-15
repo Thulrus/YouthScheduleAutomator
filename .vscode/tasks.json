@@ -6,9 +6,6 @@
       "type": "shell",
       "command": "npm",
       "args": ["install"],
-      "options": {
-        "cwd": "${workspaceFolder}/web"
-      },
       "problemMatcher": [],
       "presentation": {
         "echo": true,
@@ -24,9 +21,6 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "dev"],
-      "options": {
-        "cwd": "${workspaceFolder}/web"
-      },
       "isBackground": true,
       "problemMatcher": {
         "pattern": {
@@ -55,9 +49,6 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "build"],
-      "options": {
-        "cwd": "${workspaceFolder}/web"
-      },
       "problemMatcher": ["$tsc"],
       "group": {
         "kind": "build",
@@ -77,9 +68,6 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "preview"],
-      "options": {
-        "cwd": "${workspaceFolder}/web"
-      },
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
@@ -96,9 +84,6 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "lint"],
-      "options": {
-        "cwd": "${workspaceFolder}/web"
-      },
       "problemMatcher": ["$eslint-stylish"],
       "presentation": {
         "echo": true,

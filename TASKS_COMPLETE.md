@@ -23,17 +23,24 @@ The Youth Scheduler project has been fully converted to a web-only application. 
 
 ## ✨ Current Project Structure
 
-```
+```text
 YouthScheduleAutomator/
-├── web/                          # React + TypeScript application
-│   ├── src/                     # Source code
-│   ├── public/                  # Static assets & example configs
-│   ├── dist/                    # Production build (gitignored)
-│   └── README.md
+├── src/                          # React + TypeScript application
+│   ├── models.ts                # Data structures
+│   ├── rules.ts                 # Date generation
+│   ├── scheduler.ts             # Core algorithm
+│   ├── strategies.ts            # Assignment strategies
+│   ├── exporters.ts             # File exports
+│   ├── App.tsx                  # Main UI
+│   ├── main.tsx                 # Entry point
+│   └── index.css                # Styling
+├── public/                       # Static assets & example configs
+├── dist/                         # Production build (gitignored)
 ├── .github/workflows/
 │   └── deploy.yml               # Auto-deploy to GitHub Pages
 ├── .vscode/
 │   └── tasks.json               # Web-only VS Code tasks
+├── CONFIG_FORMAT.md             # Configuration docs
 ├── README.md                     # Main documentation
 ├── QUICKSTART.md                # Getting started guide
 ├── MIGRATION.md                 # Migration history
@@ -196,19 +203,17 @@ Created production-ready examples:
 
 ## File Structure
 
-```
+```text
 Scheduler/
 ├── .vscode/
 │   └── tasks.json                    ← ✨ Enhanced with new tasks
-├── web/
-│   ├── public/
-│   │   ├── example-people.json       ← ✨ New example file
-│   │   └── example-rules.json        ← ✨ New example file
-│   ├── src/
-│   │   ├── App.tsx                   ← ✨ Enhanced with import/export
-│   │   └── index.css                 ← ✨ New styles for buttons
-│   ├── CONFIG_FORMAT.md              ← ✨ New documentation
-│   └── README.md                     ← ✨ Updated
+├── src/
+│   ├── App.tsx                       ← ✨ Enhanced with import/export
+│   └── index.css                     ← ✨ New styles for buttons
+├── public/
+│   ├── example-people.json           ← ✨ New example file
+│   └── example-rules.json            ← ✨ New example file
+├── CONFIG_FORMAT.md                  ← ✨ New documentation
 ├── QUICKSTART.md                     ← ✨ New guide
 └── MIGRATION.md                      ← From previous work
 ```

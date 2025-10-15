@@ -36,7 +36,7 @@ That's it! You'll see a schedule appear.
 
 If you're working in VS Code, use these tasks (Ctrl+Shift+P → "Tasks: Run Task"):
 
-- **Start Dev Server** - Launch the app locally at http://localhost:5173
+- **Start Dev Server** - Launch the app locally at <http://localhost:5173>
 - **Build Production** - Create optimized production build
 - **Preview Production Build** - Test the production build
 - **Run Linter** - Check code quality with ESLint
@@ -132,7 +132,8 @@ If you're working in VS Code, use these tasks (Ctrl+Shift+P → "Tasks: Run Task
 
 ## Support
 
-Need help? 
+**Need help?**
+
 - Check the example configurations
 - Read the detailed documentation
 - Open an issue on GitHub

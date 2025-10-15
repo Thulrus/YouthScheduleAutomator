@@ -26,7 +26,6 @@ No installation needed! Works on any device with a modern web browser.
 ### Run Locally for Development
 
 ```bash
-cd web
 npm install
 npm run dev
 ```
@@ -60,11 +59,12 @@ The app supports JSON import/export for easy sharing and backup:
 - **People Config** (`people-config.json`): Leaders and groups
 - **Rules Config** (`rules-config.json`): Recurring event patterns
 
-Example files are available in `web/public/`:
+Example files are available in `public/`:
+
 - `example-people.json` - Sample leaders and groups
 - `example-rules.json` - Sample recurring events
 
-See [web/CONFIG_FORMAT.md](web/CONFIG_FORMAT.md) for detailed file format documentation.
+See [CONFIG_FORMAT.md](CONFIG_FORMAT.md) for detailed file format documentation.
 
 ## 📝 Configuration Examples
 
@@ -118,18 +118,16 @@ See [web/CONFIG_FORMAT.md](web/CONFIG_FORMAT.md) for detailed file format docume
 
 ```
 YouthScheduleAutomator/
-├── web/                          # React + TypeScript web app
-│   ├── src/
-│   │   ├── models.ts            # Data structures
-│   │   ├── rules.ts             # Date generation logic
-│   │   ├── scheduler.ts         # Core scheduling algorithm
-│   │   ├── strategies.ts        # Assignment strategies
-│   │   ├── exporters.ts         # File export functions
-│   │   └── App.tsx              # Main UI component
-│   ├── public/
-│   │   ├── example-people.json  # Sample people config
-│   │   └── example-rules.json   # Sample rules config
-│   └── README.md                # Web app documentation
+├── src/                          # React + TypeScript source code
+│   ├── models.ts                # Data structures
+│   ├── rules.ts                 # Date generation logic
+│   ├── scheduler.ts             # Core scheduling algorithm
+│   ├── strategies.ts            # Assignment strategies
+│   ├── exporters.ts             # File export functions
+│   └── App.tsx                  # Main UI component
+├── public/
+│   ├── example-people.json      # Sample people config
+│   └── example-rules.json       # Sample rules config
 ├── .github/workflows/
 │   └── deploy.yml               # GitHub Pages deployment
 └── README.md                     # This file
@@ -138,8 +136,6 @@ YouthScheduleAutomator/
 ### Building & Testing
 
 ```bash
-cd web
-
 # Install dependencies
 npm install
 
@@ -173,8 +169,8 @@ The app automatically deploys to GitHub Pages via GitHub Actions when you push t
 ### Manual Deployment
 
 1. Build the production version:
+
    ```bash
-   cd web
    npm run build
    ```
 

@@ -1,49 +1,52 @@
-# OS files
-.DS_Store
-Thumbs.db
+# Dependencies
+node_modules
 
-# Editor directories
+# Build outputs
+dist
+dist-ssr
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local env files
+*.local
+
+# Editor directories and files
 .vscode/*
 !.vscode/tasks.json
 !.vscode/extensions.json
 .idea
-
-# Web app (Node.js / React)
-web/node_modules/
-web/dist/
-web/.vite/
-web/*.local
-web/package-lock.json
-
-# Build outputs
-dist/
-*.log
-test-results/
-tests/__pycache__/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IDE / Editor
-.idea/
-!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.swp
 *.swo
 
-# Mypy / Ruff / Pyright
-.mypy_cache/
-.ruff_cache/
-pyrightconfig.json
+# OS files
+.DS_Store
+Thumbs.db
 
-# Logs
-*.log
-
-# Generated outputs
+# Generated schedule outputs
 output/
 **/schedule.md
 **/schedule.csv
 **/schedule.ics
 
-# OS
-.DS_Store
-Thumbs.db
+# Python cache (legacy, if any remains)
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+pyrightconfig.json
+.pytest_cache/
+.ipynb_checkpoints
+
+# Lock files (optional - some projects commit these)
+package-lock.json

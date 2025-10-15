@@ -103,9 +103,14 @@ Total: ~2,500 lines of Python + ~2,000 lines of TypeScript
 ### After (Web-Only)
 ```
 YouthScheduleAutomator/
-├── web/                (React + TypeScript app)
-│   ├── src/           (All application logic)
-│   └── public/        (Static assets + examples)
+├── src/                (React + TypeScript source)
+│   ├── models.ts      (Data models)
+│   ├── rules.ts       (Date generation)
+│   ├── scheduler.ts   (Core algorithm)
+│   ├── strategies.ts  (Assignment logic)
+│   ├── exporters.ts   (File exports)
+│   └── App.tsx        (Main UI)
+├── public/            (Static assets + examples)
 ├── .github/           (CI/CD)
 ├── .vscode/           (IDE config)
 └── docs...            (Documentation only)
@@ -165,7 +170,8 @@ Total: ~2,000 lines of TypeScript (single language!)
 ## 🚀 Current Project State
 
 ### What Remains
-```
+
+```text
 YouthScheduleAutomator/
 ├── .editorconfig              # Editor config
 ├── .github/                   
@@ -181,29 +187,26 @@ YouthScheduleAutomator/
 ├── QUICKSTART.md              # Getting started
 ├── README.md                  # Main documentation
 ├── TASKS_COMPLETE.md          # Feature history
-└── web/                       # The entire application
-    ├── public/
-    │   ├── calendar.svg
-    │   ├── example-people.json
-    │   └── example-rules.json
-    ├── src/
-    │   ├── App.css
-    │   ├── App.tsx
-    │   ├── exporters.ts
-    │   ├── index.css
-    │   ├── main.tsx
-    │   ├── models.ts
-    │   ├── rules.ts
-    │   ├── scheduler.ts
-    │   └── strategies.ts
-    ├── .gitignore
-    ├── CONFIG_FORMAT.md
-    ├── index.html
-    ├── package.json
-    ├── README.md
-    ├── tsconfig.json
-    ├── tsconfig.node.json
-    └── vite.config.ts
+├── src/                       # The entire application
+│   ├── App.css
+│   ├── App.tsx
+│   ├── exporters.ts
+│   ├── index.css
+│   ├── main.tsx
+│   ├── models.ts
+│   ├── rules.ts
+│   ├── scheduler.ts
+│   └── strategies.ts
+├── public/
+│   ├── calendar.svg
+│   ├── example-people.json
+│   └── example-rules.json
+├── CONFIG_FORMAT.md
+├── index.html
+├── package.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
 ```
 
 ### What's Gone
@@ -234,8 +237,8 @@ The project is production-ready:
    - Make it live at: https://Thulrus.github.io/YouthScheduleAutomator/
 
 ### For Development
+
 ```bash
-cd web
 npm install    # One-time setup
 npm run dev    # Start development server
 npm run build  # Build for production

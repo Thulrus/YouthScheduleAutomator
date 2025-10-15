@@ -64,29 +64,23 @@ git push origin main
 
 ```
 Scheduler/
-├── web/                          # React + TypeScript web app
-│   ├── src/
-│   │   ├── models.ts            # TypeScript data models
-│   │   ├── rules.ts             # Date generation logic
-│   │   ├── scheduler.ts         # Core scheduling algorithm
-│   │   ├── strategies.ts        # Assignment strategies
-│   │   ├── exporters.ts         # File export functions
-│   │   ├── App.tsx              # Main React component
-│   │   ├── main.tsx             # React entry point
-│   │   └── index.css            # Styling
-│   ├── public/
-│   │   ├── calendar.svg         # App icon
-│   │   ├── example-people.json  # Sample people config
-│   │   └── example-rules.json   # Sample rules config
-│   ├── dist/                     # Built files (gitignored)
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── CONFIG_FORMAT.md         # JSON config documentation
-│   └── README.md
-├── .github/workflows/
-│   └── deploy.yml               # GitHub Pages deployment
-├── .vscode/
-│   └── tasks.json               # VS Code tasks
+├── src/                          # React + TypeScript source
+│   ├── models.ts                # TypeScript data models
+│   ├── rules.ts                 # Date generation logic
+│   ├── scheduler.ts             # Core scheduling algorithm
+│   ├── strategies.ts            # Assignment strategies
+│   ├── exporters.ts             # File export functions
+│   ├── App.tsx                  # Main React component
+│   ├── main.tsx                 # React entry point
+│   └── index.css                # Styling
+├── public/
+│   ├── calendar.svg             # App icon
+│   ├── example-people.json      # Sample people config
+│   └── example-rules.json       # Sample rules config
+├── dist/                         # Built files (gitignored)
+├── package.json
+├── vite.config.ts
+├── CONFIG_FORMAT.md             # JSON config documentation
 ├── QUICKSTART.md                # Quick start guide
 ├── MIGRATION.md                 # This file
 └── README.md                     # Main documentation
@@ -119,11 +113,9 @@ The decision to remove Python code and go web-only provides several benefits:
 - ✅ **Modern Stack** - React, TypeScript, Vite
 - ✅ **Cleaner Codebase** - No language mixing
 
-## � Deployment
+## 📦 Deployment
 
 ```bash
-cd web
-
 # Start development server
 npm run dev
 

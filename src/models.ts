@@ -25,6 +25,7 @@ export interface Event {
   rotationPool?: string[]; // candidate groups when responsibility_mode=group
   startTime?: string; // HH:MM 24h format
   durationMinutes?: number;
+  youthCount?: number; // number of youth to assign per leader (0 or undefined = none)
 }
 
 export interface Assignment {
@@ -36,10 +37,19 @@ export interface Assignment {
   responsibleGroup?: string;
   startTime?: string;
   durationMinutes?: number;
+  // Youth assignments for combined events: maps each leader to their assigned youth
+  youthAssignments?: Array<{
+    leader: string;
+    youth: string[];
+  }>;
   // For separate events: array of group-specific assignments
   groupAssignments?: Array<{
     group: string;
     leaders: string[];
+    youthAssignments?: Array<{
+      leader: string;
+      youth: string[];
+    }>;
   }>;
 }
 
@@ -58,19 +68,46 @@ export class Schedule {
     kind: string;
     inCharge: string;
     description: string;
+    youthHelpers: string;
   }> {
     return this.assignments.map(a => {
       let inCharge: string;
+      let youthHelpers: string = '';
       
       // Handle grouped separate assignments
       if (a.groupAssignments && a.groupAssignments.length > 0) {
         inCharge = a.groupAssignments
           .map(ga => `${ga.group}: ${ga.leaders.join(', ') || 'TBD'}`)
           .join(' | ');
+        
+        // Format youth for separate events
+        const youthParts = a.groupAssignments
+          .filter(ga => ga.youthAssignments && ga.youthAssignments.length > 0)
+          .map(ga => {
+            const youthStrs = ga.youthAssignments!
+              .map(ya => `${ya.leader}: ${ya.youth.join(', ') || 'none'}`)
+              .join('; ');
+            return `${ga.group} - ${youthStrs}`;
+          });
+        youthHelpers = youthParts.join(' | ');
       } else if (a.responsibleGroup) {
         inCharge = `${a.responsibleGroup}${a.leaders.length > 0 ? ` (${a.leaders.join(', ')})` : ''}`;
+        
+        // Format youth for combined events with responsible group
+        if (a.youthAssignments && a.youthAssignments.length > 0) {
+          youthHelpers = a.youthAssignments
+            .map(ya => `${ya.leader}: ${ya.youth.join(', ') || 'none'}`)
+            .join(' | ');
+        }
       } else {
         inCharge = a.leaders.join(', ') || 'N/A';
+        
+        // Format youth for combined events
+        if (a.youthAssignments && a.youthAssignments.length > 0) {
+          youthHelpers = a.youthAssignments
+            .map(ya => `${ya.leader}: ${ya.youth.join(', ') || 'none'}`)
+            .join(' | ');
+        }
       }
       
       return {
@@ -78,6 +115,7 @@ export class Schedule {
         kind: a.kind,
         inCharge,
         description: a.description,
+        youthHelpers,
       };
     });
   }

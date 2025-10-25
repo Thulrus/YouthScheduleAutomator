@@ -924,6 +924,27 @@ function App() {
                             step="5"
                           />
                         </div>
+                        
+                        <div className="form-group">
+                          <label>Youth Assignments per Leader</label>
+                          <input
+                            type="number"
+                            value={rule.youth_assignments?.count || 0}
+                            onChange={(e) => {
+                              const count = parseInt(e.target.value) || 0;
+                              updateRule(index, {
+                                ...rule,
+                                youth_assignments: count > 0 ? { count } : undefined
+                              });
+                            }}
+                            placeholder="0"
+                            min="0"
+                            max="10"
+                          />
+                          <small style={{ display: 'block', marginTop: '4px', color: '#666' }}>
+                            Number of youth to assign to each leader (0 = none)
+                          </small>
+                        </div>
                       </div>
                       
                       <div className="form-group">
@@ -1251,6 +1272,15 @@ function App() {
                                 {assignment.groupAssignments.map((ga, idx) => (
                                   <li key={idx}>
                                     <strong>{ga.group}:</strong> {ga.leaders.join(', ') || 'TBD'}
+                                    {ga.youthAssignments && ga.youthAssignments.length > 0 && (
+                                      <ul style={{ marginTop: '4px', fontSize: '0.9em', color: '#666' }}>
+                                        {ga.youthAssignments.map((ya, yaIdx) => (
+                                          <li key={yaIdx}>
+                                            👦 {ya.leader}: {ya.youth.join(', ') || 'none'}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
                                   </li>
                                 ))}
                               </ul>
@@ -1258,6 +1288,15 @@ function App() {
                           ) : assignment.leaders.length > 0 && (
                             <div className="card-leaders">
                               <strong>Leaders:</strong> {assignment.leaders.join(', ')}
+                              {assignment.youthAssignments && assignment.youthAssignments.length > 0 && (
+                                <ul style={{ marginTop: '8px', fontSize: '0.9em', color: '#666', listStyleType: 'none', paddingLeft: 0 }}>
+                                  {assignment.youthAssignments.map((ya, yaIdx) => (
+                                    <li key={yaIdx}>
+                                      👦 {ya.leader}: {ya.youth.join(', ') || 'none'}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1275,6 +1314,7 @@ function App() {
                     <th>Date</th>
                     <th>Type</th>
                     <th>In Charge</th>
+                    <th>Youth Helpers</th>
                     <th>Description</th>
                   </tr>
                 </thead>
@@ -1284,6 +1324,7 @@ function App() {
                       <td>{row.date}</td>
                       <td>{row.kind}</td>
                       <td>{row.inCharge}</td>
+                      <td>{row.youthHelpers || '—'}</td>
                       <td>{row.description}</td>
                     </tr>
                   ))}

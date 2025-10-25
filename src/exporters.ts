@@ -27,15 +27,16 @@ export function generateMarkdown(schedule: Schedule): string {
   }
 
   let md = '# Schedule\n\n';
-  md += '| Date | Type | In Charge | Description |\n';
-  md += '|------|------|-----------|-------------|\n';
+  md += '| Date | Type | In Charge | Youth Helpers | Description |\n';
+  md += '|------|------|-----------|---------------|-------------|\n';
 
   rows.forEach(row => {
     const date = new Date(row.date);
     // Escape pipe characters in cell content for Markdown tables
     const escapedInCharge = row.inCharge.replace(/\|/g, '\\|');
+    const escapedYouth = (row.youthHelpers || '—').replace(/\|/g, '\\|');
     const escapedDescription = row.description.replace(/\|/g, '\\|');
-    md += `| ${formatDate(date)} | ${row.kind} | ${escapedInCharge} | ${escapedDescription} |\n`;
+    md += `| ${formatDate(date)} | ${row.kind} | ${escapedInCharge} | ${escapedYouth} | ${escapedDescription} |\n`;
   });
 
   return md;
@@ -46,13 +47,14 @@ export function generateMarkdown(schedule: Schedule): string {
  */
 export function generateCSV(schedule: Schedule): string {
   const rows = schedule.toRows();
-  let csv = 'Date,Type,In Charge,Description\n';
+  let csv = 'Date,Type,In Charge,Youth Helpers,Description\n';
 
   rows.forEach(row => {
     const date = new Date(row.date);
     const escapedCharge = row.inCharge.includes(',') ? `"${row.inCharge}"` : row.inCharge;
+    const escapedYouth = (row.youthHelpers || '—').includes(',') ? `"${row.youthHelpers || '—'}"` : (row.youthHelpers || '—');
     const escapedDesc = row.description.includes(',') ? `"${row.description}"` : row.description;
-    csv += `${formatDate(date)},${row.kind},${escapedCharge},${escapedDesc}\n`;
+    csv += `${formatDate(date)},${row.kind},${escapedCharge},${escapedYouth},${escapedDesc}\n`;
   });
 
   return csv;
@@ -102,7 +104,16 @@ export function generateICS(schedule: Schedule, timezone: string = 'America/Denv
     if (assignment.groupAssignments && assignment.groupAssignments.length > 0) {
       description += ' - Assignments: ';
       description += assignment.groupAssignments
-        .map(ga => `${ga.group}: ${ga.leaders.join(', ') || 'TBD'}`)
+        .map(ga => {
+          let gaStr = `${ga.group}: ${ga.leaders.join(', ') || 'TBD'}`;
+          if (ga.youthAssignments && ga.youthAssignments.length > 0) {
+            const youthStr = ga.youthAssignments
+              .map(ya => `${ya.leader} (Youth: ${ya.youth.join(', ') || 'none'})`)
+              .join(', ');
+            gaStr += ` [${youthStr}]`;
+          }
+          return gaStr;
+        })
         .join('; ');
     } else {
       if (assignment.responsibleGroup) {
@@ -110,6 +121,12 @@ export function generateICS(schedule: Schedule, timezone: string = 'America/Denv
       }
       if (assignment.leaders.length > 0) {
         description += ` - Leaders: ${assignment.leaders.join(', ')}`;
+        if (assignment.youthAssignments && assignment.youthAssignments.length > 0) {
+          const youthStr = assignment.youthAssignments
+            .map(ya => `${ya.leader} (Youth: ${ya.youth.join(', ') || 'none'})`)
+            .join('; ');
+          description += ` - Youth: ${youthStr}`;
+        }
       }
     }
     ics += `DESCRIPTION:${escapeICS(description)}\r\n`;
@@ -287,6 +304,14 @@ export function generateTextMessage(schedule: Schedule): string {
         assignment.groupAssignments.forEach(ga => {
           const leaders = ga.leaders.join(' & ') || 'TBD';
           text += `  • ${ga.group}: ${leaders}\n`;
+          // Add youth if present
+          if (ga.youthAssignments && ga.youthAssignments.length > 0) {
+            ga.youthAssignments.forEach(ya => {
+              if (ya.youth.length > 0) {
+                text += `    👦 Youth with ${ya.leader}: ${ya.youth.join(', ')}\n`;
+              }
+            });
+          }
         });
       } else {
         // Single assignment (combined or old-style)
@@ -302,6 +327,14 @@ export function generateTextMessage(schedule: Schedule): string {
           inCharge = assignment.leaders.join(' & ') || 'TBD';
         }
         text += `: ${inCharge}\n`;
+        // Add youth if present
+        if (assignment.youthAssignments && assignment.youthAssignments.length > 0) {
+          assignment.youthAssignments.forEach(ya => {
+            if (ya.youth.length > 0) {
+              text += `  👦 Youth with ${ya.leader}: ${ya.youth.join(', ')}\n`;
+            }
+          });
+        }
       }
     });
   });

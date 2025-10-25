@@ -21,6 +21,9 @@ export interface RecurringRule {
   description: string;
   startTime?: string;
   durationMinutes?: number;
+  youthAssignments?: {
+    count: number; // number of youth to assign per leader
+  };
 }
 
 /**
@@ -37,6 +40,15 @@ export function parseRules(rawRules: any[]): RecurringRule[] {
       };
     }
     
+    // Parse youth assignments, converting snake_case to camelCase
+    let youthAssignments: RecurringRule['youthAssignments'] = undefined;
+    if (rule.youth_assignments || rule.youthAssignments) {
+      const ya = rule.youth_assignments || rule.youthAssignments;
+      if (ya && typeof ya.count === 'number' && ya.count > 0) {
+        youthAssignments = { count: ya.count };
+      }
+    }
+    
     return {
       name: rule.name,
       frequency: rule.frequency,
@@ -50,6 +62,7 @@ export function parseRules(rawRules: any[]): RecurringRule[] {
       description: rule.description || rule.name,
       startTime: rule.start_time,
       durationMinutes: rule.duration_minutes,
+      youthAssignments,
     };
   });
 }

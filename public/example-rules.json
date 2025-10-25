@@ -39,7 +39,10 @@
       },
       "description": "Combined Sunday Lesson",
       "start_time": "10:00",
-      "duration_minutes": 50
+      "duration_minutes": 50,
+      "youth_assignments": {
+        "count": 2
+      }
     },
     {
       "name": "Third Tuesday YM Combined Activity",
@@ -63,7 +66,10 @@
       "kind": "separate",
       "description": "Separate Sunday Lessons",
       "start_time": "10:00",
-      "duration_minutes": 50
+      "duration_minutes": 50,
+      "youth_assignments": {
+        "count": 1
+      }
     },
     {
       "name": "Fourth Tuesday Separate Activity",

@@ -646,6 +646,193 @@
   height: 16px;
 }
 
+/* Rotation Pool Styles */
+.field-description {
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0.25rem 0 0.75rem 0;
+  font-style: italic;
+}
+
+@media (prefers-color-scheme: light) {
+  .field-description {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.rotation-pool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(100, 108, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 108, 255, 0.1);
+  min-height: 50px;
+}
+
+.empty-message {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85em;
+  font-style: italic;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+@media (prefers-color-scheme: light) {
+  .empty-message {
+    color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+.pool-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.pool-item:hover {
+  background: rgba(100, 108, 255, 0.15);
+  border-color: rgba(100, 108, 255, 0.3);
+}
+
+.pool-item-order {
+  font-weight: 600;
+  color: rgba(100, 108, 255, 0.8);
+  min-width: 1.5rem;
+  font-size: 0.9em;
+}
+
+.pool-item-name {
+  flex: 1;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.pool-item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pool-action-button {
+  padding: 0.25rem 0.5rem;
+  background: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+  min-width: 2rem;
+}
+
+.pool-action-button:hover:not(:disabled) {
+  background: rgba(100, 108, 255, 0.2);
+  border-color: rgba(100, 108, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.pool-action-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pool-action-button.delete {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+.pool-action-button.delete:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+.add-to-pool-section {
+  padding: 0.75rem;
+  background: rgba(76, 175, 80, 0.05);
+  border-radius: 6px;
+  border: 1px dashed rgba(76, 175, 80, 0.3);
+}
+
+.add-pool-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-pool-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.pool-select,
+.pool-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid rgba(100, 108, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.pool-select:focus,
+.pool-input:focus {
+  outline: none;
+  border-color: #646cff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pool-select option {
+  background: #1a1a1a;
+  color: white;
+}
+
+@media (prefers-color-scheme: light) {
+  .pool-select,
+  .pool-input {
+    background: rgba(0, 0, 0, 0.02);
+  }
+  
+  .pool-select:focus,
+  .pool-input:focus {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  
+  .pool-select option {
+    background: white;
+    color: black;
+  }
+}
+
+.add-pool-button {
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.15);
+  border: 2px solid rgba(76, 175, 80, 0.5);
+  border-radius: 6px;
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-pool-button:hover {
+  background: rgba(76, 175, 80, 0.25);
+  border-color: #4caf50;
+  transform: translateY(-1px);
+}
+
+
 .add-button {
   background: rgba(76, 175, 80, 0.1);
   border: 2px dashed rgba(76, 175, 80, 0.5);

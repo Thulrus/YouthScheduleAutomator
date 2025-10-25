@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { parseRules } from './rules';
 import { buildSchedule } from './scheduler';
 import { Schedule, Leader, Group } from './models';
-import { StrategyName } from './strategies';
 import { exportMarkdown, exportCSV, exportICS, exportTextMessage } from './exporters';
 import './App.css';
 
@@ -48,8 +47,6 @@ function App() {
   const [startDate, setStartDate] = useState(`${currentYear}-01-01`);
   const [duration, setDuration] = useState<ScheduleDuration>('1-year');
   const [timezone, setTimezone] = useState('America/Denver');
-  const [strategy, setStrategy] = useState<StrategyName>('round-robin');
-  const [leadersPerCombined, setLeadersPerCombined] = useState(2);
   
   // Config state - using objects instead of YAML strings
   const [leaders, setLeaders] = useState<Leader[]>(() => {
@@ -163,8 +160,8 @@ function App() {
         parsedRules,
         start,
         end,
-        strategy,
-        leadersPerCombined
+        'round-robin',
+        1
       );
       
       setSchedule(newSchedule);
@@ -682,17 +679,6 @@ function App() {
                           ))}
                         </div>
                       </div>
-                      
-                      <div className="form-group">
-                        <label>Weight (for weighted strategy)</label>
-                        <input
-                          type="number"
-                          value={leader.weight}
-                          onChange={(e) => updateLeader(index, { ...leader, weight: parseInt(e.target.value) || 1 })}
-                          min="1"
-                          max="10"
-                        />
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -954,27 +940,160 @@ function App() {
                       
                       {rule.responsibility?.mode === 'group' && (
                         <div className="form-group">
-                          <label>Rotation Pool (groups that rotate)</label>
-                          <div className="checkbox-group">
-                            {allGroupNames.map(groupName => (
-                              <label key={groupName} className="checkbox-label">
+                          <label>Rotation Pool</label>
+                          <p className="field-description">Groups rotate responsibility in the order listed. Groups are tracked across all pools for fair distribution.</p>
+                          
+                          {/* Current pool list */}
+                          <div className="rotation-pool-list">
+                            {(rule.responsibility?.rotation_pool || []).length === 0 ? (
+                              <p className="empty-message">No groups in rotation pool. Add groups below.</p>
+                            ) : (
+                              (rule.responsibility?.rotation_pool || []).map((groupName: string, poolIndex: number) => (
+                                <div key={poolIndex} className="pool-item">
+                                  <span className="pool-item-order">{poolIndex + 1}.</span>
+                                  <span className="pool-item-name">{groupName}</span>
+                                  <div className="pool-item-actions">
+                                    <button
+                                      type="button"
+                                      className="pool-action-button"
+                                      onClick={() => {
+                                        const currentPool = rule.responsibility?.rotation_pool || [];
+                                        if (poolIndex > 0) {
+                                          const newPool = [...currentPool];
+                                          [newPool[poolIndex - 1], newPool[poolIndex]] = [newPool[poolIndex], newPool[poolIndex - 1]];
+                                          updateRule(index, {
+                                            ...rule,
+                                            responsibility: { ...rule.responsibility, rotation_pool: newPool }
+                                          });
+                                        }
+                                      }}
+                                      disabled={poolIndex === 0}
+                                      title="Move up"
+                                    >
+                                      ⬆️
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="pool-action-button"
+                                      onClick={() => {
+                                        const currentPool = rule.responsibility?.rotation_pool || [];
+                                        if (poolIndex < currentPool.length - 1) {
+                                          const newPool = [...currentPool];
+                                          [newPool[poolIndex], newPool[poolIndex + 1]] = [newPool[poolIndex + 1], newPool[poolIndex]];
+                                          updateRule(index, {
+                                            ...rule,
+                                            responsibility: { ...rule.responsibility, rotation_pool: newPool }
+                                          });
+                                        }
+                                      }}
+                                      disabled={poolIndex === (rule.responsibility?.rotation_pool || []).length - 1}
+                                      title="Move down"
+                                    >
+                                      ⬇️
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="pool-action-button delete"
+                                      onClick={() => {
+                                        const currentPool = rule.responsibility?.rotation_pool || [];
+                                        const newPool = currentPool.filter((_: string, i: number) => i !== poolIndex);
+                                        updateRule(index, {
+                                          ...rule,
+                                          responsibility: { ...rule.responsibility, rotation_pool: newPool }
+                                        });
+                                      }}
+                                      title="Remove from pool"
+                                    >
+                                      ✖️
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          
+                          {/* Add group section */}
+                          <div className="add-to-pool-section">
+                            <div className="add-pool-controls">
+                              {/* Available groups dropdown */}
+                              {(() => {
+                                // Collect all unique groups from rotation pools across all rules
+                                const allPoolGroups = new Set<string>();
+                                rules.forEach(r => {
+                                  if (r.responsibility?.mode === 'group' && r.responsibility?.rotation_pool) {
+                                    r.responsibility.rotation_pool.forEach((g: string) => allPoolGroups.add(g));
+                                  }
+                                });
+                                const currentPool = rule.responsibility?.rotation_pool || [];
+                                const availableGroups = Array.from(allPoolGroups).filter(g => !currentPool.includes(g)).sort();
+                                
+                                return availableGroups.length > 0 && (
+                                  <div className="add-pool-option">
+                                    <select
+                                      className="pool-select"
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          const currentPool = rule.responsibility?.rotation_pool || [];
+                                          updateRule(index, {
+                                            ...rule,
+                                            responsibility: { ...rule.responsibility, rotation_pool: [...currentPool, e.target.value] }
+                                          });
+                                          e.target.value = ''; // Reset dropdown
+                                        }
+                                      }}
+                                      defaultValue=""
+                                    >
+                                      <option value="" disabled>+ Add group from other pools</option>
+                                      {availableGroups.map(g => (
+                                        <option key={g} value={g}>{g}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                );
+                              })()}
+                              
+                              {/* Custom group name input */}
+                              <div className="add-pool-option">
                                 <input
-                                  type="checkbox"
-                                  checked={rule.responsibility?.rotation_pool?.includes(groupName) || false}
-                                  onChange={(e) => {
-                                    const currentPool = rule.responsibility?.rotation_pool || [];
-                                    const newPool = e.target.checked
-                                      ? [...currentPool, groupName]
-                                      : currentPool.filter((g: string) => g !== groupName);
-                                    updateRule(index, {
-                                      ...rule,
-                                      responsibility: { ...rule.responsibility, rotation_pool: newPool }
-                                    });
+                                  type="text"
+                                  className="pool-input"
+                                  placeholder="Or type custom group name"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                      const currentPool = rule.responsibility?.rotation_pool || [];
+                                      const newGroupName = e.currentTarget.value.trim();
+                                      if (!currentPool.includes(newGroupName)) {
+                                        updateRule(index, {
+                                          ...rule,
+                                          responsibility: { ...rule.responsibility, rotation_pool: [...currentPool, newGroupName] }
+                                        });
+                                        e.currentTarget.value = '';
+                                      }
+                                    }
                                   }}
                                 />
-                                {groupName}
-                              </label>
-                            ))}
+                                <button
+                                  type="button"
+                                  className="add-pool-button"
+                                  onClick={(e) => {
+                                    const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                                    if (input.value.trim()) {
+                                      const currentPool = rule.responsibility?.rotation_pool || [];
+                                      const newGroupName = input.value.trim();
+                                      if (!currentPool.includes(newGroupName)) {
+                                        updateRule(index, {
+                                          ...rule,
+                                          responsibility: { ...rule.responsibility, rotation_pool: [...currentPool, newGroupName] }
+                                        });
+                                        input.value = '';
+                                      }
+                                    }
+                                  }}
+                                >
+                                  ➕ Add
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -991,7 +1110,7 @@ function App() {
       <section className="settings-section">
         <div className="section-header">
           <h2>⚙️ Step 2: Schedule Settings</h2>
-          <p className="section-description">Configure date range and assignment strategy</p>
+          <p className="section-description">Configure date range and timezone</p>
         </div>
         
         <div className="settings-form">
@@ -1028,28 +1147,6 @@ function App() {
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Assignment Strategy</label>
-              <select value={strategy} onChange={(e) => setStrategy(e.target.value as StrategyName)}>
-                <option value="round-robin">Round Robin</option>
-                <option value="random">Random</option>
-                <option value="weighted">Weighted</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label>Leaders per Combined Event</label>
-              <input
-                type="number"
-                value={leadersPerCombined}
-                onChange={(e) => setLeadersPerCombined(parseInt(e.target.value))}
-                min="1"
-                max="5"
-              />
             </div>
           </div>
           

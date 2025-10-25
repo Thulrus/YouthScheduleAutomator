@@ -18,25 +18,75 @@ function formatDate(date: Date): string {
 }
 
 /**
- * Generate Markdown table
+ * Generate Markdown document (print-friendly format)
  */
 export function generateMarkdown(schedule: Schedule): string {
-  const rows = schedule.toRows();
-  if (rows.length === 0) {
+  if (schedule.assignments.length === 0) {
     return '# Schedule\n\nNo events scheduled.\n';
   }
 
-  let md = '# Schedule\n\n';
-  md += '| Date | Type | In Charge | Youth Helpers | Description |\n';
-  md += '|------|------|-----------|---------------|-------------|\n';
-
-  rows.forEach(row => {
-    const date = new Date(row.date);
-    // Escape pipe characters in cell content for Markdown tables
-    const escapedInCharge = row.inCharge.replace(/\|/g, '\\|');
-    const escapedYouth = (row.youthHelpers || '—').replace(/\|/g, '\\|');
-    const escapedDescription = row.description.replace(/\|/g, '\\|');
-    md += `| ${formatDate(date)} | ${row.kind} | ${escapedInCharge} | ${escapedYouth} | ${escapedDescription} |\n`;
+  let md = '# Youth Activity Schedule\n\n';
+  
+  schedule.assignments.forEach((assignment) => {
+    // Date header with day name
+    const date = assignment.date;
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayName = dayNames[date.getDay()];
+    
+    // Compact header: Date (Day) - Description
+    md += `### ${formatDate(date)} (${dayName}) - ${assignment.description}\n`;
+    
+    // Time info on same line if available
+    if (assignment.startTime) {
+      md += `*${assignment.startTime}`;
+      if (assignment.durationMinutes) {
+        md += ` • ${assignment.durationMinutes}min`;
+      }
+      md += `*  `;
+    }
+    md += `*[${assignment.kind === 'combined' ? 'Combined' : 'Separate'}]*\n`;
+    
+    // Leader assignments
+    if (assignment.groupAssignments && assignment.groupAssignments.length > 0) {
+      // Separate event - inline format
+      assignment.groupAssignments.forEach(ga => {
+        md += `- **${ga.group}:** ${ga.leaders.join(', ') || 'TBD'}`;
+        
+        // Youth helpers inline if present (without repeating leader name)
+        if (ga.youthAssignments && ga.youthAssignments.length > 0) {
+          const youthParts = ga.youthAssignments.map(ya => {
+            return ya.youth.length > 0 ? ya.youth.join(', ') : 'none';
+          });
+          md += ` - Helpers: ${youthParts.join('; ')}`;
+        }
+        md += '\n';
+      });
+    } else {
+      // Combined event - more compact
+      const parts: string[] = [];
+      
+      if (assignment.responsibleGroup) {
+        parts.push(`Group: ${assignment.responsibleGroup}`);
+      }
+      
+      if (assignment.leaders.length > 0) {
+        parts.push(`Leaders: ${assignment.leaders.join(', ')}`);
+      }
+      
+      if (parts.length > 0) {
+        md += `- ${parts.join(' • ')}\n`;
+      }
+      
+      // Youth assignments for combined events - inline (without repeating leader name)
+      if (assignment.youthAssignments && assignment.youthAssignments.length > 0) {
+        const youthParts = assignment.youthAssignments.map(ya => {
+          return ya.youth.length > 0 ? ya.youth.join(', ') : 'none';
+        });
+        md += `- Helpers: ${youthParts.join('; ')}\n`;
+      }
+    }
+    
+    md += '\n';
   });
 
   return md;
@@ -52,7 +102,7 @@ export function generateCSV(schedule: Schedule): string {
   rows.forEach(row => {
     const date = new Date(row.date);
     const escapedCharge = row.inCharge.includes(',') ? `"${row.inCharge}"` : row.inCharge;
-    const escapedYouth = (row.youthHelpers || '—').includes(',') ? `"${row.youthHelpers || '—'}"` : (row.youthHelpers || '—');
+    const escapedYouth = (row.youthHelpers || '-').includes(',') ? `"${row.youthHelpers || '-'}"` : (row.youthHelpers || '-');
     const escapedDesc = row.description.includes(',') ? `"${row.description}"` : row.description;
     csv += `${formatDate(date)},${row.kind},${escapedCharge},${escapedYouth},${escapedDesc}\n`;
   });

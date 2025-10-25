@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Youth Scheduler - Complete Configuration",
+  "description": "Combined configuration file for leaders, groups, and recurring event rules",
+  "version": "1.0.0",
+  "leaders": [
+    {
+      "name": "John Smith",
+      "groups": ["deacons"],
+      "availability": ["tue", "sun"],
+      "weight": 1
+    },
+    {
+      "name": "Steve Doe",
+      "groups": ["teachers", "deacons"],
+      "availability": ["tue", "thu", "sun"],
+      "weight": 1
+    },
+    {
+      "name": "Bob Johnson",
+      "groups": ["priests", "teachers"],
+      "availability": ["tue", "wed", "sun"],
+      "weight": 2
+    },
+    {
+      "name": "Ted Williams",
+      "groups": ["priests"],
+      "availability": ["wed"],
+      "weight": 1
+    }
+  ],
+  "groups": [
+    {
+      "name": "deacons",
+      "members": [
+        "Alex Brown",
+        "Chris Davis",
+        "Sam Miller"
+      ]
+    },
+    {
+      "name": "teachers",
+      "members": [
+        "Jordan Wilson",
+        "Taylor Moore",
+        "Casey Taylor"
+      ]
+    },
+    {
+      "name": "priests",
+      "members": [
+        "Morgan Anderson",
+        "Riley Thomas",
+        "Avery Jackson"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "name": "First Tuesday Separate Activities",
+      "frequency": "monthly",
+      "weekday": 1,
+      "nth": 1,
+      "kind": "separate",
+      "description": "Separate Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Second Tuesday - YW/YM Combined Activity (Rotating Group)",
+      "frequency": "monthly",
+      "weekday": 1,
+      "nth": 2,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "group",
+        "rotation_pool": ["Priests", "Deacons_Teachers", "YW_Older", "YW_Younger"]
+      },
+      "description": "Combined YW/YM Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Second Sunday Combined Lesson (Leader Led)",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 2,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "leader"
+      },
+      "description": "Combined Sunday Lesson",
+      "start_time": "10:00",
+      "duration_minutes": 50,
+      "youth_assignments": {
+        "count": 2
+      }
+    },
+    {
+      "name": "Third Tuesday YM Combined Activity",
+      "frequency": "monthly",
+      "weekday": 1,
+      "nth": 3,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "group",
+        "rotation_pool": ["Priests", "Deacons_Teachers"]
+      },
+      "description": "Combined YM Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Fourth Sunday Separate Lessons",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 4,
+      "kind": "separate",
+      "description": "Separate Sunday Lessons",
+      "start_time": "10:00",
+      "duration_minutes": 50,
+      "youth_assignments": {
+        "count": 1
+      }
+    },
+    {
+      "name": "Fourth Tuesday Separate Activity",
+      "frequency": "monthly",
+      "weekday": 1,
+      "nth": 4,
+      "kind": "separate",
+      "description": "Separate Activity Night",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Fifth Tuesday Combined Activity (Bishopric)",
+      "frequency": "monthly",
+      "weekday": 1,
+      "nth": 5,
+      "kind": "combined",
+      "description": "Fifth Tuesday Combined Activity (Bishopric)",
+      "start_time": "19:00",
+      "duration_minutes": 90
+    },
+    {
+      "name": "Fifth Sunday Combined Lesson (Bishopric)",
+      "frequency": "monthly",
+      "weekday": 6,
+      "nth": 5,
+      "kind": "combined",
+      "responsibility": {
+        "mode": "none"
+      },
+      "description": "Fifth Sunday Combined Lesson (Bishopric)",
+      "start_time": "10:00",
+      "duration_minutes": 50
+    }
+  ]
+}

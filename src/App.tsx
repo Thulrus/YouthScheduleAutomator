@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { parseRules } from './rules';
 import { buildSchedule } from './scheduler';
 import { Schedule, Leader, Group } from './models';
@@ -120,6 +120,16 @@ function App() {
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState<'success' | 'error'>('success');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  
+  // Auto-dismiss toast after 5 seconds
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => {
+        setStatusMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   // Calculate end date based on start date and duration
   const calculateEndDate = (start: Date, dur: ScheduleDuration): Date => {
@@ -290,6 +300,33 @@ function App() {
     }
   };
 
+  const handleExportAllJSON = () => {
+    try {
+      const completeConfig = {
+        version: '1.0.0',
+        leaders,
+        groups,
+        rules,
+      };
+      
+      const blob = new Blob([JSON.stringify(completeConfig, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'complete-config.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setStatusType('success');
+      setStatusMessage('✅ Exported complete configuration (leaders, groups, and rules)');
+    } catch (error) {
+      setStatusType('error');
+      setStatusMessage(`❌ Export error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   const handleImportLeadersJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -371,6 +408,59 @@ function App() {
     event.target.value = '';
   };
 
+  const handleImportAllJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const config = JSON.parse(content);
+        
+        // Check if this is a complete config file (has all three sections)
+        const hasLeaders = config.leaders && Array.isArray(config.leaders);
+        const hasGroups = config.groups && Array.isArray(config.groups);
+        const hasRules = config.rules && Array.isArray(config.rules);
+        
+        if (!hasLeaders && !hasGroups && !hasRules) {
+          throw new Error('Invalid format: file must contain at least one of "leaders", "groups", or "rules" arrays');
+        }
+        
+        const importedItems: string[] = [];
+        
+        // Import leaders if present
+        if (hasLeaders) {
+          setLeaders(config.leaders);
+          localStorage.setItem('leaders', JSON.stringify(config.leaders));
+          importedItems.push(`${config.leaders.length} leader(s)`);
+        }
+        
+        // Import groups if present
+        if (hasGroups) {
+          setGroups(config.groups);
+          localStorage.setItem('groups', JSON.stringify(config.groups));
+          importedItems.push(`${config.groups.length} group(s)`);
+        }
+        
+        // Import rules if present
+        if (hasRules) {
+          setRules(config.rules);
+          localStorage.setItem('rules', JSON.stringify(config.rules));
+          importedItems.push(`${config.rules.length} rule(s)`);
+        }
+        
+        setStatusType('success');
+        setStatusMessage(`✅ Imported ${importedItems.join(', ')}`);
+      } catch (error) {
+        setStatusType('error');
+        setStatusMessage(`❌ Failed to import configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   const handleLoadExampleLeaders = async () => {
     try {
       const response = await fetch('/YouthScheduleAutomator/example-leaders.json');
@@ -440,6 +530,51 @@ function App() {
     } catch (error) {
       setStatusType('error');
       setStatusMessage(`❌ Failed to load example rules: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleLoadExampleAll = async () => {
+    try {
+      const response = await fetch('/YouthScheduleAutomator/example-config.json');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const config = await response.json();
+      
+      const importedItems: string[] = [];
+      
+      // Load leaders if present
+      if (config.leaders && Array.isArray(config.leaders)) {
+        setLeaders(config.leaders);
+        localStorage.setItem('leaders', JSON.stringify(config.leaders));
+        importedItems.push(`${config.leaders.length} leader(s)`);
+      }
+      
+      // Load groups if present
+      if (config.groups && Array.isArray(config.groups)) {
+        setGroups(config.groups);
+        localStorage.setItem('groups', JSON.stringify(config.groups));
+        importedItems.push(`${config.groups.length} group(s)`);
+      }
+      
+      // Load rules if present
+      if (config.rules && Array.isArray(config.rules)) {
+        setRules(config.rules);
+        localStorage.setItem('rules', JSON.stringify(config.rules));
+        importedItems.push(`${config.rules.length} rule(s)`);
+      }
+      
+      if (importedItems.length === 0) {
+        throw new Error('Invalid format: file must contain at least one of "leaders", "groups", or "rules" arrays');
+      }
+      
+      setStatusType('success');
+      setStatusMessage(`✅ Loaded complete example configuration: ${importedItems.join(', ')}`);
+    } catch (error) {
+      setStatusType('error');
+      setStatusMessage(`❌ Failed to load example configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -569,10 +704,17 @@ function App() {
         <p className="app-subtitle">Configure your team, define recurring events, and generate schedules automatically</p>
       </header>
       
-      {/* Status Bar - Always Visible */}
+      {/* Toast Notification */}
       {statusMessage && (
-        <div className={`status-message status-${statusType}`}>
-          {statusMessage}
+        <div className={`toast toast-${statusType}`}>
+          <span className="toast-message">{statusMessage}</span>
+          <button 
+            className="toast-close" 
+            onClick={() => setStatusMessage('')}
+            aria-label="Close notification"
+          >
+            ✕
+          </button>
         </div>
       )}
       
@@ -581,6 +723,41 @@ function App() {
         <div className="section-header">
           <h2>📝 Step 1: Configure People & Events</h2>
           <p className="section-description">Set up your leaders, groups, and recurring event rules</p>
+        </div>
+        
+        {/* COMBINED IMPORT/EXPORT SECTION */}
+        <div style={{ 
+          marginBottom: '24px', 
+          padding: '16px', 
+          backgroundColor: 'var(--card-bg)', 
+          borderRadius: '8px',
+          border: '2px solid var(--border-color)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <strong style={{ fontSize: '1.1em' }}>🎯 Quick Configuration</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.9em', color: '#666' }}>
+                Import or export all settings at once (leaders, groups, and rules)
+              </p>
+            </div>
+            <div className="button-group-inline">
+              <label className="button-secondary-inline">
+                📁 Import All
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportAllJSON}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              <button className="button-secondary-inline" onClick={handleExportAllJSON}>
+                💾 Export All
+              </button>
+              <button className="button-secondary-inline" onClick={handleLoadExampleAll}>
+                ⭐ Load Example
+              </button>
+            </div>
+          </div>
         </div>
         
         {/* LEADERS ACCORDION */}
@@ -1276,7 +1453,7 @@ function App() {
                                       <ul style={{ marginTop: '4px', fontSize: '0.9em', color: '#666' }}>
                                         {ga.youthAssignments.map((ya, yaIdx) => (
                                           <li key={yaIdx}>
-                                            👦 {ya.leader}: {ya.youth.join(', ') || 'none'}
+                                            Assistant: {ya.youth.join(', ') || 'none'}
                                           </li>
                                         ))}
                                       </ul>
@@ -1292,7 +1469,7 @@ function App() {
                                 <ul style={{ marginTop: '8px', fontSize: '0.9em', color: '#666', listStyleType: 'none', paddingLeft: 0 }}>
                                   {assignment.youthAssignments.map((ya, yaIdx) => (
                                     <li key={yaIdx}>
-                                      👦 {ya.leader}: {ya.youth.join(', ') || 'none'}
+                                      Assistant: {ya.youth.join(', ') || 'none'}
                                     </li>
                                   ))}
                                 </ul>

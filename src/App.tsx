@@ -84,6 +84,7 @@ function App() {
   const [leadersOpen, setLeadersOpen] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [schedulePreviewOpen, setSchedulePreviewOpen] = useState(false);
   
   // Toggle functions - close others when opening one
   const toggleLeaders = () => {
@@ -108,6 +109,10 @@ function App() {
       setLeadersOpen(false);
       setGroupsOpen(false);
     }
+  };
+  
+  const toggleSchedulePreview = () => {
+    setSchedulePreviewOpen(!schedulePreviewOpen);
   };
   
   // Schedule state
@@ -165,6 +170,7 @@ function App() {
       );
       
       setSchedule(newSchedule);
+      setSchedulePreviewOpen(false); // Close preview to reduce clutter
       setStatusType('success');
       setStatusMessage(`✅ Generated ${newSchedule.assignments.length} assignments`);
       
@@ -1117,11 +1123,25 @@ function App() {
           <div className="form-row">
             <div className="form-group">
               <label>Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <div className="date-input-group">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="today-button"
+                  onClick={() => {
+                    const today = new Date();
+                    const todayStr = today.toISOString().split('T')[0];
+                    setStartDate(todayStr);
+                  }}
+                  title="Set to today's date"
+                >
+                  📅 Today
+                </button>
+              </div>
             </div>
             
             <div className="form-group">
@@ -1159,35 +1179,41 @@ function App() {
       {/* STEP 3: Schedule Preview (only shows after generation) */}
       {schedule && (
         <section className="preview-section">
-          <div className="section-header">
-            <div>
-              <h2>📅 Step 3: Schedule Preview</h2>
-              <p className="preview-summary">
-                {schedule.assignments.length} total assignments
-                {schedule.assignments.length > 150 && ' (showing first 150)'}
-              </p>
-            </div>
-            <div className="view-toggle">
-              <button 
-                className={viewMode === 'cards' ? 'active' : ''}
-                onClick={() => setViewMode('cards')}
-                title="Card View"
-              >
-                🎴 Cards
-              </button>
-              <button 
-                className={viewMode === 'table' ? 'active' : ''}
-                onClick={() => setViewMode('table')}
-                title="Table View"
-              >
-                📊 Table
-              </button>
-            </div>
+          <div className="accordion-header">
+            <button
+              className={`accordion-button ${schedulePreviewOpen ? 'open' : ''}`}
+              onClick={toggleSchedulePreview}
+            >
+              <span className="accordion-icon">{schedulePreviewOpen ? '▼' : '▶'}</span>
+              <span className="accordion-title">
+                📅 Step 3: Schedule Preview ({schedule.assignments.length} assignments)
+              </span>
+            </button>
+            {schedulePreviewOpen && (
+              <div className="view-toggle">
+                <button 
+                  className={viewMode === 'cards' ? 'active' : ''}
+                  onClick={() => setViewMode('cards')}
+                  title="Card View"
+                >
+                  🎴 Cards
+                </button>
+                <button 
+                  className={viewMode === 'table' ? 'active' : ''}
+                  onClick={() => setViewMode('table')}
+                  title="Table View"
+                >
+                  📊 Table
+                </button>
+              </div>
+            )}
           </div>
           
-          {viewMode === 'cards' ? (
-            <div className="schedule-timeline">
-              {Object.entries(groupedAssignments).slice(0, 5).map(([month, assignments]) => (
+          {schedulePreviewOpen && (
+            <div className="accordion-content">
+              {viewMode === 'cards' ? (
+                <div className="schedule-timeline">
+                  {Object.entries(groupedAssignments).slice(0, 5).map(([month, assignments]) => (
                 <div key={month} className="month-group">
                   <h3 className="month-header">{month}</h3>
                   <div className="assignments-grid">
@@ -1270,6 +1296,8 @@ function App() {
             <p className="more-months-note">
               📌 Showing first 5 months in card view. Switch to table view or export to see the complete schedule.
             </p>
+          )}
+            </div>
           )}
         </section>
       )}

@@ -78,14 +78,14 @@ export function generateICS(schedule: Schedule, timezone: string = 'America/Denv
 
     // Date/time
     if (assignment.startTime && timezone !== 'floating') {
-      const dtStart = formatICSDateTimeWithTZ(assignment.date, assignment.startTime, timezone);
+      const dtStart = formatICSDateTimeWithTZ(assignment.date, assignment.startTime);
       ics += `DTSTART;TZID=${timezone}:${dtStart}\r\n`;
       
       if (assignment.durationMinutes) {
         const endDate = new Date(assignment.date);
         const [hours, minutes] = assignment.startTime.split(':').map(Number);
         endDate.setHours(hours, minutes + assignment.durationMinutes);
-        const dtEnd = formatICSDateTimeWithTZ(endDate, '', timezone);
+        const dtEnd = formatICSDateTimeWithTZ(endDate, '');
         ics += `DTEND;TZID=${timezone}:${dtEnd}\r\n`;
       }
     } else {
@@ -145,7 +145,7 @@ function formatICSDateTime(date: Date): string {
 /**
  * Format datetime with timezone for ICS
  */
-function formatICSDateTimeWithTZ(date: Date, time: string, _timezone: string): string {
+function formatICSDateTimeWithTZ(date: Date, time: string): string {
   const dateStr = formatICSDate(date);
   if (time) {
     const [hours, minutes] = time.split(':');

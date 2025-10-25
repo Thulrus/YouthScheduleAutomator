@@ -125,7 +125,7 @@ function generateWeeklyDates(rule: RecurringRule, year: number): Date[] {
   const start = new Date(year, 0, 1);
   const end = new Date(year, 11, 31);
 
-  let current = new Date(start);
+  const current = new Date(start);
   
   // Find first occurrence of the weekday
   while (current.getDay() !== convertWeekday(rule.weekday)) {
@@ -157,7 +157,7 @@ function nthWeekdayOfMonth(
   if (nth > 0) {
     // Forward search (1st, 2nd, 3rd, etc.)
     const firstDay = new Date(year, month - 1, 1);
-    let current = new Date(firstDay);
+    const current = new Date(firstDay);
     
     // Find first occurrence
     while (current.getDay() !== jsWeekday) {
@@ -174,7 +174,7 @@ function nthWeekdayOfMonth(
   } else if (nth < 0) {
     // Backward search (last, second-to-last, etc.)
     const lastDay = new Date(year, month, 0); // Last day of month
-    let current = new Date(lastDay);
+    const current = new Date(lastDay);
     
     // Find last occurrence
     while (current.getDay() !== jsWeekday) {

@@ -260,7 +260,8 @@ export function buildSchedule(
   end: Date,
   strategyName: StrategyName = 'round-robin',
   leadersPerCombined: number = 2,
-  initialState?: SchedulerState
+  initialState?: SchedulerState,
+  randomSeed: number = 0
 ): Schedule {
   const leaders = buildLeaders(rawLeaders);
   const groups = buildGroups(rawGroups);
@@ -287,7 +288,7 @@ export function buildSchedule(
       let leadersToAssign: string[] = [];
       
       if (event.leaderRequired) {
-        leadersToAssign = strategy.assignLeaders(event, leaders, leadersPerCombined, assignmentState);
+        leadersToAssign = strategy.assignLeaders(event, leaders, leadersPerCombined, assignmentState, randomSeed);
       }
       
       // Assign youth to leaders if requested
@@ -336,7 +337,7 @@ export function buildSchedule(
           // Filter leaders to exclude those already assigned to this event
           const availableLeaders = leaders.filter(l => !leadersAssignedThisEvent.has(l.name));
           
-          leadersToAssign = strategy.assignLeaders(groupSpecificEvent, availableLeaders, 1, assignmentState);
+          leadersToAssign = strategy.assignLeaders(groupSpecificEvent, availableLeaders, 1, assignmentState, randomSeed);
           
           // Track this leader so they're not assigned to another group on the same event
           leadersToAssign.forEach(name => leadersAssignedThisEvent.add(name));

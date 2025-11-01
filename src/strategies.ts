@@ -12,7 +12,8 @@ export interface AssignmentStrategy {
     event: Event,
     leaders: Leader[],
     count: number,
-    state: Map<string, number>
+    state: Map<string, number>,
+    seedOffset?: number
   ): string[];
 }
 
@@ -24,7 +25,9 @@ export class RoundRobinStrategy implements AssignmentStrategy {
     event: Event,
     leaders: Leader[],
     count: number,
-    state: Map<string, number>
+    state: Map<string, number>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _seedOffset?: number
   ): string[] {
     const eligible = leaders.filter(
       l =>
@@ -78,7 +81,8 @@ export class RandomStrategy implements AssignmentStrategy {
     event: Event,
     leaders: Leader[],
     count: number,
-    state: Map<string, number>
+    state: Map<string, number>,
+    seedOffset: number = 0
   ): string[] {
     const eligible = leaders.filter(
       l =>
@@ -88,8 +92,8 @@ export class RandomStrategy implements AssignmentStrategy {
 
     if (eligible.length === 0) return [];
 
-    // Create a deterministic seed from the event date
-    const seed = event.date.getTime();
+    // Create a deterministic seed from the event date plus optional seed offset
+    const seed = event.date.getTime() + seedOffset;
     const rng = new SeededRandom(seed);
 
     // Deterministic shuffle using seeded random
@@ -118,7 +122,9 @@ export class WeightedStrategy implements AssignmentStrategy {
     event: Event,
     leaders: Leader[],
     count: number,
-    state: Map<string, number>
+    state: Map<string, number>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _seedOffset?: number
   ): string[] {
     const eligible = leaders.filter(
       l =>

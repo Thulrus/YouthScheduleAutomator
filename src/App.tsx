@@ -47,6 +47,10 @@ function App() {
   const [startDate, setStartDate] = useState(`${currentYear}-01-01`);
   const [duration, setDuration] = useState<ScheduleDuration>('1-year');
   const [timezone, setTimezone] = useState('America/Denver');
+  const [randomSeed, setRandomSeed] = useState(() => {
+    const saved = localStorage.getItem('randomSeed');
+    return saved ? parseInt(saved, 10) : 0;
+  });
   
   // Config state - using objects instead of YAML strings
   const [leaders, setLeaders] = useState<Leader[]>(() => {
@@ -176,7 +180,9 @@ function App() {
         start,
         end,
         'round-robin',
-        1
+        1,
+        undefined,
+        randomSeed
       );
       
       setSchedule(newSchedule);
@@ -187,6 +193,7 @@ function App() {
       localStorage.setItem('leaders', JSON.stringify(leaders));
       localStorage.setItem('groups', JSON.stringify(groups));
       localStorage.setItem('rules', JSON.stringify(rules));
+      localStorage.setItem('randomSeed', randomSeed.toString());
       
     } catch (error) {
       setStatusType('error');
@@ -307,6 +314,7 @@ function App() {
         leaders,
         groups,
         rules,
+        randomSeed,
       };
       
       const blob = new Blob([JSON.stringify(completeConfig, null, 2)], { type: 'application/json' });
@@ -448,6 +456,13 @@ function App() {
           setRules(config.rules);
           localStorage.setItem('rules', JSON.stringify(config.rules));
           importedItems.push(`${config.rules.length} rule(s)`);
+        }
+        
+        // Import random seed if present
+        if (config.randomSeed !== undefined && typeof config.randomSeed === 'number') {
+          setRandomSeed(config.randomSeed);
+          localStorage.setItem('randomSeed', config.randomSeed.toString());
+          importedItems.push('random seed');
         }
         
         setStatusType('success');
@@ -1365,6 +1380,32 @@ function App() {
                   </option>
                 ))}
               </select>
+            </div>
+            
+            <div className="form-group">
+              <label>
+                Random Seed
+                <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
+                  (for deterministic random assignments)
+                </span>
+              </label>
+              <input
+                type="number"
+                value={randomSeed}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (!isNaN(value)) {
+                    setRandomSeed(value);
+                    localStorage.setItem('randomSeed', value.toString());
+                  }
+                }}
+                placeholder="0"
+                style={{ width: '100%' }}
+              />
+              <p style={{ fontSize: '0.85em', color: '#666', margin: '4px 0 0 0' }}>
+                Changing this value will produce different random assignments while keeping the schedule deterministic. 
+                Same seed always produces the same results.
+              </p>
             </div>
           </div>
           

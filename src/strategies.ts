@@ -26,8 +26,7 @@ export class RoundRobinStrategy implements AssignmentStrategy {
     leaders: Leader[],
     count: number,
     state: Map<string, number>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _seedOffset?: number
+    seedOffset: number = 0
   ): string[] {
     const eligible = leaders.filter(
       l =>
@@ -37,11 +36,23 @@ export class RoundRobinStrategy implements AssignmentStrategy {
 
     if (eligible.length === 0) return [];
 
-    // Sort by assignment count (ascending)
+    // Create a deterministic seed from the event date plus seed offset
+    const seed = event.date.getTime() + seedOffset;
+
+    // Sort by assignment count (ascending), then by seeded random for tie-breaking
     eligible.sort((a, b) => {
       const countA = state.get(a.name) || 0;
       const countB = state.get(b.name) || 0;
-      return countA - countB;
+      if (countA !== countB) {
+        return countA - countB;
+      }
+      // Tie-breaker: use seeded random based on leader names
+      // This ensures same seed produces same order for tied leaders
+      const hashA = a.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const hashB = b.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const rngA = new SeededRandom(seed + hashA);
+      const rngB = new SeededRandom(seed + hashB);
+      return rngA.next() - rngB.next();
     });
 
     const selected = eligible.slice(0, Math.min(count, eligible.length));

@@ -1386,7 +1386,7 @@ function App() {
               <label>
                 Random Seed
                 <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
-                  (for deterministic random assignments)
+                  (affects tie-breaking in assignments)
                 </span>
               </label>
               <input
@@ -1403,7 +1403,8 @@ function App() {
                 style={{ width: '100%' }}
               />
               <p style={{ fontSize: '0.85em', color: '#666', margin: '4px 0 0 0' }}>
-                Changing this value will produce different random assignments while keeping the schedule deterministic. 
+                When multiple leaders have the same assignment count, this seed determines which one is selected. 
+                Changing this value will produce different assignments while keeping the schedule deterministic. 
                 Same seed always produces the same results.
               </p>
             </div>

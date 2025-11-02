@@ -38,24 +38,25 @@ export class RoundRobinStrategy implements AssignmentStrategy {
 
     // Create a deterministic seed from the event date plus seed offset
     const seed = event.date.getTime() + seedOffset;
+    const rng = new SeededRandom(seed);
 
-    // Sort by assignment count (ascending), then by seeded random for tie-breaking
-    eligible.sort((a, b) => {
+    // Deterministically shuffle the eligible leaders based on the seed
+    // This provides the initial randomized starting order
+    const shuffled = [...eligible];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng.next() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Sort by assignment count (ascending) to maintain round-robin fairness
+    // Leaders with fewer assignments are selected first
+    shuffled.sort((a, b) => {
       const countA = state.get(a.name) || 0;
       const countB = state.get(b.name) || 0;
-      if (countA !== countB) {
-        return countA - countB;
-      }
-      // Tie-breaker: use seeded random based on leader names
-      // This ensures same seed produces same order for tied leaders
-      const hashA = a.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const hashB = b.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const rngA = new SeededRandom(seed + hashA);
-      const rngB = new SeededRandom(seed + hashB);
-      return rngA.next() - rngB.next();
+      return countA - countB;
     });
 
-    const selected = eligible.slice(0, Math.min(count, eligible.length));
+    const selected = shuffled.slice(0, Math.min(count, shuffled.length));
     
     // Update state
     selected.forEach(l => {

@@ -4,8 +4,9 @@
  * Run with: npx tsx test-seed-variation.ts
  */
 
-import { buildSchedule, getSchedulerState } from './src/scheduler';
+import { buildSchedule } from './src/scheduler';
 import { parseRules } from './src/rules';
+import { Schedule, Assignment } from './src/models';
 
 // Test configuration with multiple leaders in same group
 const leaders = [
@@ -35,11 +36,13 @@ const rulesRaw = [
 
 const rules = parseRules(rulesRaw);
 
+const SEPARATOR_LENGTH = 50;
+
 console.log("🧪 Testing Random Seed Variation\n");
 
 // Test 1: Same seed produces same results
 console.log("Test 1: Same seed produces identical results");
-console.log("=" .repeat(50));
+console.log("=".repeat(SEPARATOR_LENGTH));
 
 const seed1_run1 = buildSchedule(
   leaders,
@@ -83,7 +86,7 @@ seed1_run2.assignments.slice(0, 2).forEach(a => {
 
 // Test 2: Different seeds produce different results
 console.log("\n\nTest 2: Different seeds produce different results");
-console.log("=" .repeat(50));
+console.log("=".repeat(SEPARATOR_LENGTH));
 
 const seed2_result = buildSchedule(
   leaders,
@@ -114,7 +117,7 @@ seed2_result.assignments.slice(0, 2).forEach(a => {
 
 // Test 3: Round-robin fairness is maintained regardless of seed
 console.log("\n\nTest 3: Round-robin fairness maintained across different seeds");
-console.log("=" .repeat(50));
+console.log("=".repeat(SEPARATOR_LENGTH));
 
 // Run with two different seeds
 const fairness_seed1 = buildSchedule(
@@ -142,9 +145,9 @@ const fairness_seed2 = buildSchedule(
 );
 
 // Count assignments per leader for both seeds
-const countAssignments = (schedule: any) => {
+const countAssignments = (schedule: Schedule) => {
   const counts = new Map<string, number>();
-  schedule.assignments.forEach((a: any) => {
+  schedule.assignments.forEach((a: Assignment) => {
     a.leaders.forEach((leader: string) => {
       counts.set(leader, (counts.get(leader) || 0) + 1);
     });
@@ -182,7 +185,7 @@ console.log(`Both have low variance (fair distribution): ${variance1 < 2 && vari
 
 // Test 4: Seed of 0 works correctly
 console.log("\n\nTest 4: Seed of 0 works correctly");
-console.log("=" .repeat(50));
+console.log("=".repeat(SEPARATOR_LENGTH));
 
 const seed0_result = buildSchedule(
   leaders,
@@ -200,7 +203,7 @@ console.log(`Schedule generated with seed 0: ${seed0_result.assignments.length} 
 console.log(`First assignment: ${seed0_result.assignments[0]?.leaders.join(', ') || 'none'}`);
 console.log(`Seed 0 works: ${seed0_result.assignments.length > 0 ? '✅' : '❌'}`);
 
-console.log("\n" + "=".repeat(50));
+console.log("\n" + "=".repeat(SEPARATOR_LENGTH));
 console.log("All tests completed!");
 
 if (match1 && !match2 && variance1 < 2 && variance2 < 2 && seed0_result.assignments.length > 0) {

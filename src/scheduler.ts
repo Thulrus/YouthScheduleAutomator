@@ -6,6 +6,7 @@
 import { Leader, Group, Event, Assignment, Schedule } from './models';
 import { RecurringRule, generateDates } from './rules';
 import { getStrategy, StrategyName } from './strategies';
+import { SeededRandom } from './utils';
 
 /**
  * Build Leader objects from raw config
@@ -89,7 +90,7 @@ export function expandEvents(
  * Tracks how many times each group has been assigned and when they were last assigned
  * Prioritizes groups that have been assigned less frequently and less recently
  */
-function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string, number>): Map<string, number> {
+function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string, number>, randomSeed: number = 0): Map<string, number> {
   const rotationState = new Map<string, number>(initialGroupState);
   
   // Track assignment counts and last assignment index for each group
@@ -114,8 +115,20 @@ function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string
     const pool = event.rotationPool!;
     const poolKey = pool.join(',');
     
-    // Build candidate scores for each group in the pool
-    const candidates: Array<{ group: string; score: number }> = pool.map(group => {
+    // Create a deterministic seed from the event date plus seed offset
+    const seed = event.date.getTime() + randomSeed;
+    const rng = new SeededRandom(seed);
+    
+    // Deterministically shuffle the pool based on the seed
+    // This provides the initial randomized starting order
+    const shuffledPool = [...pool];
+    for (let i = shuffledPool.length - 1; i > 0; i--) {
+      const j = Math.floor(rng.next() * (i + 1));
+      [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+    }
+    
+    // Build candidate scores for each group in the shuffled pool
+    const candidates: Array<{ group: string; score: number; shuffledIndex: number }> = shuffledPool.map((group, shuffledIndex) => {
       const assignmentCount = groupAssignmentCount.get(group) || 0;
       const lastAssignedIndex = groupLastAssigned.get(group) ?? -1;
       const eventsSinceLastAssignment = lastAssignedIndex === -1 ? 1000 : (eventIndex - lastAssignedIndex);
@@ -125,17 +138,17 @@ function assignResponsibleGroups(events: Event[], initialGroupState?: Map<string
       // Also weight total assignments (want fair distribution)
       const score = (assignmentCount * 100) - (eventsSinceLastAssignment * 10);
       
-      return { group, score };
+      return { group, score, shuffledIndex };
     });
     
     // Sort by score (ascending - lowest score = best candidate)
-    // Then by pool order as tiebreaker for determinism
+    // Then by shuffled pool order as tiebreaker for determinism
     candidates.sort((a, b) => {
       if (a.score !== b.score) {
         return a.score - b.score;
       }
-      // Tiebreaker: maintain pool order for determinism
-      return pool.indexOf(a.group) - pool.indexOf(b.group);
+      // Tiebreaker: maintain shuffled pool order for determinism
+      return a.shuffledIndex - b.shuffledIndex;
     });
     
     // Select the best candidate (lowest score)
@@ -273,7 +286,8 @@ export function buildSchedule(
   // Assign responsible groups with initial state
   const groupRotationState = assignResponsibleGroups(
     events, 
-    initialState?.groupRotations
+    initialState?.groupRotations,
+    randomSeed
   );
 
   // Assign leaders with initial state

@@ -4,6 +4,7 @@
  */
 
 import { Leader, Event, isLeaderAvailable } from './models';
+import { SeededRandom } from './utils';
 
 export type StrategyName = 'round-robin' | 'random' | 'weighted';
 
@@ -64,23 +65,6 @@ export class RoundRobinStrategy implements AssignmentStrategy {
     });
 
     return selected.map(l => l.name);
-  }
-}
-
-/**
- * Seeded random number generator for deterministic random selection
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    // Linear congruential generator
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
   }
 }
 

@@ -6,6 +6,7 @@
 import { Leader, Group, Event, Assignment, Schedule } from './models';
 import { RecurringRule, generateDates } from './rules';
 import { getStrategy, StrategyName } from './strategies';
+import { SeededRandom } from './utils';
 
 /**
  * Build Leader objects from raw config
@@ -82,23 +83,6 @@ export function expandEvents(
   // Sort by date
   events.sort((a, b) => a.date.getTime() - b.date.getTime());
   return events;
-}
-
-/**
- * Seeded random number generator for deterministic random selection
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    // Linear congruential generator
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
 }
 
 /**

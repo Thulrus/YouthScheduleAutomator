@@ -1403,9 +1403,9 @@ function App() {
                 style={{ width: '100%' }}
               />
               <p style={{ fontSize: '0.85em', color: '#666', margin: '4px 0 0 0' }}>
-                When multiple leaders have the same assignment count, this seed determines which one is selected. 
-                Changing this value will produce different assignments while keeping the schedule deterministic. 
-                Same seed always produces the same results.
+                Randomizes the initial starting order for round-robin assignments. 
+                Different seeds produce different assignment patterns while maintaining fair distribution. 
+                Same seed always produces the same results (deterministic).
               </p>
             </div>
           </div>

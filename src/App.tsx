@@ -1581,7 +1581,7 @@ function App() {
               📅 Export Calendar (.ics)
             </button>
             <button className="export-button" onClick={() => handleExport('txt')}>
-              💬 Export Text Message
+              Export Text Message
             </button>
           </div>
         </section>

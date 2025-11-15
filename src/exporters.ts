@@ -334,7 +334,7 @@ export function generateTextMessage(schedule: Schedule): string {
       text += '\n\n' + '='.repeat(40) + '\n\n';
     }
     
-    text += `📅 ${monthName} ${year}\n`;
+    text += `${monthName} ${year}\n`;
     text += '─'.repeat(40) + '\n\n';
     
     const assignments = byMonth.get(monthKey)!;
@@ -358,7 +358,7 @@ export function generateTextMessage(schedule: Schedule): string {
           if (ga.youthAssignments && ga.youthAssignments.length > 0) {
             ga.youthAssignments.forEach(ya => {
               if (ya.youth.length > 0) {
-                text += `    👦 Youth with ${ya.leader}: ${ya.youth.join(', ')}\n`;
+                text += `    Assistant: ${ya.youth.join(', ')}\n`;
               }
             });
           }
@@ -381,7 +381,7 @@ export function generateTextMessage(schedule: Schedule): string {
         if (assignment.youthAssignments && assignment.youthAssignments.length > 0) {
           assignment.youthAssignments.forEach(ya => {
             if (ya.youth.length > 0) {
-              text += `  👦 Youth with ${ya.leader}: ${ya.youth.join(', ')}\n`;
+              text += `  Assistant: ${ya.youth.join(', ')}\n`;
             }
           });
         }

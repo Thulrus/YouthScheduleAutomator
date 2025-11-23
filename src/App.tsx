@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { parseRules } from './rules';
 import { buildSchedule } from './scheduler';
 import { Schedule, Leader, Group } from './models';
-import { exportMarkdown, exportCSV, exportICS, exportTextMessage } from './exporters';
+import { exportMarkdown, exportCSV, exportICS, exportTextMessage, exportHTML } from './exporters';
 import './App.css';
 
 type ScheduleDuration = '1-month' | '3-months' | '6-months' | '1-year' | '2-years';
@@ -202,7 +202,7 @@ function App() {
     }
   };
 
-  const handleExport = (format: 'md' | 'csv' | 'ics' | 'txt') => {
+  const handleExport = (format: 'md' | 'csv' | 'ics' | 'txt' | 'html') => {
     if (!schedule) {
       setStatusType('error');
       setStatusMessage('Please generate a schedule first');
@@ -222,6 +222,9 @@ function App() {
           break;
         case 'txt':
           exportTextMessage(schedule);
+          break;
+        case 'html':
+          exportHTML(schedule);
           break;
       }
       setStatusType('success');
@@ -1571,6 +1574,9 @@ function App() {
           </div>
           
           <div className="export-buttons">
+            <button className="export-button" onClick={() => handleExport('html')}>
+              🌐 Export HTML
+            </button>
             <button className="export-button" onClick={() => handleExport('md')}>
               📄 Export Markdown
             </button>
@@ -1581,7 +1587,7 @@ function App() {
               📅 Export Calendar (.ics)
             </button>
             <button className="export-button" onClick={() => handleExport('txt')}>
-              Export Text Message
+              💬 Export Text Message
             </button>
           </div>
         </section>

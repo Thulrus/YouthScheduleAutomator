@@ -259,6 +259,7 @@ function App() {
             assignments={assignments}
             leaders={file.config.leaders}
             groups={file.config.groups}
+            rules={file.config.rules}
             timezone={file.config.timezone}
             onEditAssignment={editAssignment}
             onRegenerateRange={regenerateRange}
@@ -310,6 +311,7 @@ function App() {
             assignments={assignments}
             leaders={file.config.leaders}
             groups={file.config.groups}
+            rules={file.config.rules}
             timezone={file.config.timezone}
             onEditAssignment={editAssignment}
             onRegenerateRange={regenerateRange}

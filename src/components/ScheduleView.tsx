@@ -3,7 +3,7 @@
  */
 
 import { useMemo, useState, useEffect } from 'react';
-import { SerializedAssignment, SerializedGroupAssignment, Leader, Group } from '../models';
+import { SerializedAssignment, SerializedGroupAssignment, Leader, Group, RawRule } from '../models';
 import { useFilters } from '../hooks';
 import { Button } from './common';
 import { deserializeSchedule } from '../serialization';
@@ -13,6 +13,7 @@ interface ScheduleViewProps {
   assignments: SerializedAssignment[];
   leaders: Leader[];
   groups: Group[];
+  rules: RawRule[];
   timezone: string;
   onEditAssignment: (assignmentId: string, updater: (a: SerializedAssignment) => SerializedAssignment, reason?: string) => void;
   onRegenerateRange: (startDate: Date, endDate: Date, preserveEdits?: boolean) => void;
@@ -66,6 +67,7 @@ export function ScheduleView({
   assignments,
   leaders,
   groups,
+  rules,
   timezone,
   onEditAssignment,
   onRegenerateRange: _onRegenerateRange,
@@ -297,6 +299,22 @@ export function ScheduleView({
   const allGroupNames = useMemo(() => {
     return groups.map(g => g.name);
   }, [groups]);
+  
+  // Get the rotation pool for an assignment based on its matching rule
+  const getRotationPoolForAssignment = (assignment: SerializedAssignment): string[] => {
+    // Find the rule that matches this assignment's description (which is the rule name)
+    const matchingRule = rules.find(r => 
+      r.name === assignment.description || 
+      r.description === assignment.description
+    );
+    
+    if (matchingRule?.responsibility?.mode === 'group' && matchingRule.responsibility.rotation_pool) {
+      return matchingRule.responsibility.rotation_pool;
+    }
+    
+    // Fallback: return all group names plus the current value
+    return allGroupNames;
+  };
   
   // Swap modal handlers
   const handleOpenSwap = (assignment: SerializedAssignment, groupName?: string) => {
@@ -965,34 +983,51 @@ export function ScheduleView({
                         className="form-select"
                       >
                         <option value="">None</option>
-                        {allGroupNames.map(name => (
-                          <option key={name} value={name}>{name}</option>
-                        ))}
+                        {/* Use rotation pool from the matching rule, or fall back to all groups */}
+                        {(() => {
+                          const rotationPool = getRotationPoolForAssignment(editingAssignment);
+                          // Also include current value if not in pool
+                          const options = [...new Set([
+                            ...rotationPool,
+                            ...(editingAssignment.responsibleGroup && !rotationPool.includes(editingAssignment.responsibleGroup) 
+                              ? [editingAssignment.responsibleGroup] 
+                              : [])
+                          ])];
+                          return options.map(name => (
+                            <option key={name} value={name}>{name}</option>
+                          ));
+                        })()}
                       </select>
+                      <small className="form-hint">
+                        This is a group-rotation event. The responsible group handles planning.
+                      </small>
                     </div>
                   )}
                   
-                  <div className="form-group">
-                    <label>Leaders</label>
-                    <div className="leader-checkboxes">
-                      {leaderNames.map(name => (
-                        <label key={name} className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={editFormLeaders.includes(name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setEditFormLeaders([...editFormLeaders, name]);
-                              } else {
-                                setEditFormLeaders(editFormLeaders.filter(n => n !== name));
-                              }
-                            }}
-                          />
-                          {name}
-                        </label>
-                      ))}
+                  {/* Only show leaders section if there are leaders assigned or no responsible group */}
+                  {(editingAssignment.leaders.length > 0 || !editingAssignment.responsibleGroup) && (
+                    <div className="form-group">
+                      <label>Leaders</label>
+                      <div className="leader-checkboxes">
+                        {leaderNames.map(name => (
+                          <label key={name} className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={editFormLeaders.includes(name)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEditFormLeaders([...editFormLeaders, name]);
+                                } else {
+                                  setEditFormLeaders(editFormLeaders.filter(n => n !== name));
+                                }
+                              }}
+                            />
+                            {name}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               ) : (
                 /* Separate group event or combined with group assignments */

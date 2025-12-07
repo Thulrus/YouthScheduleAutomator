@@ -2,6 +2,10 @@
  * Core data models ported from Python scheduling/models.py
  */
 
+// ============================================================================
+// CONFIGURATION MODELS (input for schedule generation)
+// ============================================================================
+
 export interface Leader {
   name: string;
   groups: string[]; // groups this leader can serve (e.g., ["deacons", "teachers"])
@@ -13,6 +17,10 @@ export interface Group {
   name: string;
   members: string[];
 }
+
+// ============================================================================
+// EVENT MODELS (intermediate representation during generation)
+// ============================================================================
 
 export interface Event {
   date: Date;
@@ -158,3 +166,144 @@ export function isLeaderAvailable(leader: Leader, date: Date): boolean {
 
   return false;
 }
+
+// ============================================================================
+// SCHEDULE FILE MODELS (for persistent storage)
+// ============================================================================
+
+/**
+ * Youth assignment within a serialized assignment
+ */
+export interface SerializedYouthAssignment {
+  leader: string;
+  youth: string[];
+}
+
+/**
+ * Group assignment within a serialized separate event
+ */
+export interface SerializedGroupAssignment {
+  group: string;
+  leaders: string[];
+  youthAssignments?: SerializedYouthAssignment[];
+}
+
+/**
+ * Serialized assignment with edit tracking
+ */
+export interface SerializedAssignment {
+  id: string;                      // Unique deterministic ID
+  date: string;                    // ISO date string (YYYY-MM-DD)
+  kind: 'combined' | 'separate';
+  description: string;
+  leaders: string[];
+  responsibleGroup?: string;
+  startTime?: string;
+  durationMinutes?: number;
+  youthAssignments?: SerializedYouthAssignment[];
+  groupAssignments?: SerializedGroupAssignment[];
+  
+  // Cancellation status
+  cancelled?: boolean;
+  cancelReason?: string;
+  
+  // Edit metadata
+  isManuallyEdited: boolean;
+  originalLeaders?: string[];
+  originalGroupAssignments?: SerializedGroupAssignment[];
+  editNotes?: string;
+}
+
+/**
+ * Record of a single edit operation for audit trail
+ */
+export interface ScheduleEdit {
+  id: string;
+  timestamp: string;
+  assignmentId: string;
+  type: 'leader-swap' | 'leader-add' | 'leader-remove' | 'youth-swap' | 'group-change' | 'full-edit' | 'regenerate' | 'cancel' | 'uncancel';
+  before: Partial<SerializedAssignment>;
+  after: Partial<SerializedAssignment>;
+  reason?: string;
+}
+
+/**
+ * Serialized scheduler state for continuity
+ */
+export interface SerializedSchedulerState {
+  leaderAssignments: Record<string, number>;
+  groupRotations: Record<string, number>;
+  youthAssignments: Record<string, number>;
+}
+
+/**
+ * Raw rule format (matches what users configure)
+ */
+export interface RawRule {
+  name: string;
+  frequency: 'weekly' | 'monthly' | 'yearly';
+  weekday?: number;
+  nth?: number;
+  month_day?: number;
+  month?: number;
+  kind?: 'combined' | 'separate';
+  groups_involved?: string[];
+  responsibility?: {
+    mode: 'none' | 'group' | 'leader';
+    rotation_pool?: string[];
+  };
+  description?: string;
+  start_time?: string;
+  duration_minutes?: number;
+  youth_assignments?: {
+    count: number;
+  };
+}
+
+/**
+ * Configuration section of a schedule file
+ */
+export interface ScheduleFileConfig {
+  leaders: Leader[];
+  groups: Group[];
+  rules: RawRule[];
+  randomSeed: number;
+  timezone: string;
+}
+
+/**
+ * Schedule data section of a schedule file
+ */
+export interface ScheduleFileData {
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  assignments: SerializedAssignment[];
+  schedulerState: SerializedSchedulerState;
+}
+
+/**
+ * Complete schedule file format
+ * File extension: .ysch (Youth SCHedule)
+ */
+export interface ScheduleFile {
+  // Metadata
+  version: string;
+  name: string;
+  createdAt: string;
+  modifiedAt: string;
+  
+  // Configuration (inputs for generation)
+  config: ScheduleFileConfig;
+  
+  // Generated data
+  schedule: ScheduleFileData;
+  
+  // Edit history (optional, for audit trail)
+  edits?: ScheduleEdit[];
+}
+
+/**
+ * Current schedule file format version
+ */
+export const SCHEDULE_FILE_VERSION = '2.0.0';
+

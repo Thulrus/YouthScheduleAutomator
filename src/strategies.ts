@@ -119,7 +119,6 @@ export class WeightedStrategy implements AssignmentStrategy {
     leaders: Leader[],
     count: number,
     state: Map<string, number>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _seedOffset?: number
   ): string[] {
     const eligible = leaders.filter(

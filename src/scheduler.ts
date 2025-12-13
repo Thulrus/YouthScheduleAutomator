@@ -180,6 +180,7 @@ function assignYouthToLeaders(
   allLeaders: Leader[],
   groups: Map<string, Group>,
   youthState: Map<string, number>,
+  randomSeed: number = 0,
   specificGroup?: string
 ): Array<{ leader: string; youth: string[] }> {
   const result: Array<{ leader: string; youth: string[] }> = [];
@@ -228,19 +229,29 @@ function assignYouthToLeaders(
       return;
     }
     
-    // Sort youth by assignment count (ascending), then alphabetically for determinism
-    eligibleYouth.sort((a, b) => {
+    // Create a deterministic seed from the event date, leader name, and seed offset
+    // This ensures different youth selections when random seed changes
+    const seed = event.date.getTime() + leaderName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + randomSeed;
+    const rng = new SeededRandom(seed);
+    
+    // Deterministically shuffle the eligible youth based on the seed
+    const shuffled = [...eligibleYouth];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng.next() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    // Sort by assignment count (ascending) to maintain fairness
+    // Youth with fewer assignments are selected first
+    shuffled.sort((a, b) => {
       const countA = youthState.get(a) || 0;
       const countB = youthState.get(b) || 0;
-      if (countA !== countB) {
-        return countA - countB;
-      }
-      return a.localeCompare(b); // Alphabetical tiebreaker
+      return countA - countB;
     });
     
     // Select the requested number of youth (or fewer if not enough available)
-    const count = Math.min(event.youthCount!, eligibleYouth.length);
-    const selectedYouth = eligibleYouth.slice(0, count);
+    const count = Math.min(event.youthCount!, shuffled.length);
+    const selectedYouth = shuffled.slice(0, count);
     
     // Update state for selected youth
     selectedYouth.forEach(youthName => {
@@ -313,7 +324,8 @@ export function buildSchedule(
           leadersToAssign,
           leaders,
           groups,
-          youthState
+          youthState,
+          randomSeed
         );
       }
       
@@ -366,6 +378,7 @@ export function buildSchedule(
             leaders,
             groups,
             youthState,
+            randomSeed,
             groupName // Only assign youth from this specific group
           );
         }

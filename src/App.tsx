@@ -37,7 +37,7 @@ function App() {
     updateLeaders,
     updateGroups,
     updateRules,
-    // updateSettings is available for future use
+    updateSettings,
     generateSchedule,
     regenerateRange,
     editAssignment,
@@ -261,9 +261,11 @@ function App() {
             groups={file.config.groups}
             rules={file.config.rules}
             timezone={file.config.timezone}
+            randomSeed={file.config.randomSeed}
             onEditAssignment={editAssignment}
             onRegenerateRange={regenerateRange}
             onGenerateSchedule={handleGenerateSchedule}
+            onUpdateRandomSeed={(seed) => updateSettings({ randomSeed: seed })}
             dateRangeStart={file.schedule.dateRangeStart}
             dateRangeEnd={file.schedule.dateRangeEnd}
           />
@@ -313,9 +315,11 @@ function App() {
             groups={file.config.groups}
             rules={file.config.rules}
             timezone={file.config.timezone}
+            randomSeed={file.config.randomSeed}
             onEditAssignment={editAssignment}
             onRegenerateRange={regenerateRange}
             onGenerateSchedule={handleGenerateSchedule}
+            onUpdateRandomSeed={(seed) => updateSettings({ randomSeed: seed })}
             dateRangeStart={file.schedule.dateRangeStart}
             dateRangeEnd={file.schedule.dateRangeEnd}
           />

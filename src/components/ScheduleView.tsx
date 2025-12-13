@@ -15,9 +15,11 @@ interface ScheduleViewProps {
   groups: Group[];
   rules: RawRule[];
   timezone: string;
+  randomSeed: number;
   onEditAssignment: (assignmentId: string, updater: (a: SerializedAssignment) => SerializedAssignment, reason?: string) => void;
   onRegenerateRange: (startDate: Date, endDate: Date, preserveEdits?: boolean) => void;
   onGenerateSchedule: (startDate: Date, endDate: Date) => void;
+  onUpdateRandomSeed: (seed: number) => void;
   dateRangeStart: string;
   dateRangeEnd: string;
 }
@@ -69,9 +71,11 @@ export function ScheduleView({
   groups,
   rules,
   timezone,
+  randomSeed,
   onEditAssignment,
   onRegenerateRange: _onRegenerateRange,
   onGenerateSchedule,
+  onUpdateRandomSeed,
   dateRangeStart,
   dateRangeEnd,
 }: ScheduleViewProps) {
@@ -87,6 +91,12 @@ export function ScheduleView({
     const now = new Date();
     return `${now.getFullYear()}-12-31`;
   });
+  const [generateSeed, setGenerateSeed] = useState(randomSeed);
+  
+  // Update generateSeed when randomSeed prop changes
+  useEffect(() => {
+    setGenerateSeed(randomSeed);
+  }, [randomSeed]);
   
   // Edit modal state
   const [editingAssignment, setEditingAssignment] = useState<SerializedAssignment | null>(null);
@@ -569,6 +579,10 @@ export function ScheduleView({
   }, [assignments, swappingAssignment, swappingGroupName]);
 
   const handleGenerate = () => {
+    // Update random seed if changed
+    if (generateSeed !== randomSeed) {
+      onUpdateRandomSeed(generateSeed);
+    }
     onGenerateSchedule(new Date(generateStart), new Date(generateEnd));
     setShowGenerateDialog(false);
   };
@@ -696,6 +710,18 @@ export function ScheduleView({
                     value={generateEnd}
                     onChange={e => setGenerateEnd(e.target.value)}
                   />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="gen-seed">Random Seed</label>
+                  <input
+                    id="gen-seed"
+                    type="number"
+                    value={generateSeed}
+                    onChange={e => setGenerateSeed(parseInt(e.target.value) || 0)}
+                    min="0"
+                    step="1"
+                  />
+                  <small className="form-hint">Change this to get different random assignments</small>
                 </div>
               </div>
               <div className="modal-footer">
@@ -933,6 +959,18 @@ export function ScheduleView({
                   value={generateEnd}
                   onChange={e => setGenerateEnd(e.target.value)}
                 />
+              </div>
+              <div className="form-group">
+                <label htmlFor="regen-seed">Random Seed</label>
+                <input
+                  id="regen-seed"
+                  type="number"
+                  value={generateSeed}
+                  onChange={e => setGenerateSeed(parseInt(e.target.value) || 0)}
+                  min="0"
+                  step="1"
+                />
+                <small className="form-hint">Change this to get different random assignments</small>
               </div>
             </div>
             <div className="modal-footer">

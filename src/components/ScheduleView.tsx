@@ -7,7 +7,7 @@ import { SerializedAssignment, SerializedGroupAssignment, Leader, Group, RawRule
 import { useFilters } from '../hooks';
 import { Button } from './common';
 import { deserializeSchedule } from '../serialization';
-import { exportMarkdown, exportCSV, exportICS, exportTextMessage, exportHTML } from '../exporters';
+import { exportICS, exportHTML, generateMarkdown, generateCSV, generateTextMessage } from '../exporters';
 
 interface ScheduleViewProps {
   assignments: SerializedAssignment[];
@@ -122,6 +122,11 @@ export function ScheduleView({
   // Export modal state for selected events
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportFormat, setExportFormat] = useState<'md' | 'csv' | 'ics' | 'txt' | 'html'>('md');
+  
+  // Text preview modal state
+  const [showTextPreview, setShowTextPreview] = useState(false);
+  const [textPreviewContent, setTextPreviewContent] = useState('');
+  const [textPreviewFormat, setTextPreviewFormat] = useState<'md' | 'csv' | 'txt'>('md');
   
   // Cancel modal state
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -611,26 +616,39 @@ export function ScheduleView({
     
     const schedule = deserializeSchedule(finalEvents);
     
-    switch (exportFormat) {
-      case 'md':
-        exportMarkdown(schedule);
-        break;
-      case 'csv':
-        exportCSV(schedule);
-        break;
-      case 'ics':
-        exportICS(schedule, timezone);
-        break;
-      case 'txt':
-        exportTextMessage(schedule);
-        break;
-      case 'html':
-        exportHTML(schedule);
-        break;
+    // For text-based formats, show content in a modal instead of downloading
+    if (exportFormat === 'md' || exportFormat === 'csv' || exportFormat === 'txt') {
+      let content = '';
+      switch (exportFormat) {
+        case 'md':
+          content = generateMarkdown(schedule);
+          break;
+        case 'csv':
+          content = generateCSV(schedule);
+          break;
+        case 'txt':
+          content = generateTextMessage(schedule);
+          break;
+      }
+      
+      setTextPreviewContent(content);
+      setTextPreviewFormat(exportFormat);
+      setShowTextPreview(true);
+      setShowExportDialog(false);
+    } else {
+      // For binary formats (iCalendar, HTML), download as before
+      switch (exportFormat) {
+        case 'ics':
+          exportICS(schedule, timezone);
+          break;
+        case 'html':
+          exportHTML(schedule);
+          break;
+      }
+      
+      setShowExportDialog(false);
+      setSelectedIds(new Set());
     }
-    
-    setShowExportDialog(false);
-    setSelectedIds(new Set());
   };
 
   // Cancel selected events
@@ -1397,6 +1415,77 @@ export function ScheduleView({
               </Button>
               <Button variant="primary" onClick={handleExportSelected}>
                 Export
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Text Preview Modal */}
+      {showTextPreview && (
+        <div className="modal-backdrop" onClick={() => setShowTextPreview(false)}>
+          <div className="modal modal-large" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">
+                {textPreviewFormat === 'md' && '📝 Markdown Export'}
+                {textPreviewFormat === 'csv' && '📊 CSV Export'}
+                {textPreviewFormat === 'txt' && '💬 Text Export'}
+              </h2>
+              <button className="modal-close" onClick={() => setShowTextPreview(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <pre className="text-preview-content">{textPreviewContent}</pre>
+            </div>
+            <div className="modal-footer">
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  navigator.clipboard.writeText(textPreviewContent);
+                  // Show brief feedback (could enhance with a toast notification)
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const originalText = btn?.textContent || '';
+                  if (btn) {
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                      btn.textContent = originalText;
+                    }, 2000);
+                  }
+                }}
+              >
+                📋 Copy to Clipboard
+              </Button>
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  // Download the file
+                  const mimeTypes = {
+                    md: 'text/markdown',
+                    csv: 'text/csv',
+                    txt: 'text/plain',
+                  };
+                  const extensions = {
+                    md: 'md',
+                    csv: 'csv',
+                    txt: 'txt',
+                  };
+                  const blob = new Blob([textPreviewContent], { type: mimeTypes[textPreviewFormat] });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `schedule-${new Date().toISOString().split('T')[0]}.${extensions[textPreviewFormat]}`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                💾 Download File
+              </Button>
+              <Button variant="primary" onClick={() => {
+                setShowTextPreview(false);
+                setSelectedIds(new Set());
+              }}>
+                Done
               </Button>
             </div>
           </div>
